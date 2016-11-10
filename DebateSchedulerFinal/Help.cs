@@ -522,6 +522,23 @@ namespace DebateSchedulerFinal
                 }
             }
 
+            /*bool clean = false;
+            while (clean = false)
+            {
+                for (int i = 0; i <= teamPairs.Count; i++)
+                {
+                    bool team1debated = false;
+                    bool team2debated = false;
+                    for (int j = 1; j <= teamPairs.Count; j++)
+                    {
+                        for (int k = 0; k <= Saturdays.Count - 1; k++)
+                        {
+                            if (teamPairs[i].team1.ID
+                        }
+                    }
+                }
+            }*/
+
             //Dictionary<int, int> prevTeams = new Dictionary<int, int>();
             //int sat = 0;
             //    foreach (TeamPair tp in teamPairs)

@@ -19,7 +19,6 @@
 [Xx]86/
 [Bb]uild/
 bld/
-[Bb]in/
 [Oo]bj/
 
 # Visual Studio 2015 cache/options directory
@@ -140,7 +139,7 @@ publish/
 *.[Pp]ublish.xml
 *.azurePubxml
 
-# TODO: Un-comment the next line if you do not want to checkin
+# TODO: Un-comment the next line if you do not want to checkin 
 # your web deploy settings because they may include unencrypted
 # passwords
 #*.pubxml
@@ -165,6 +164,9 @@ csx/
 # Microsoft Azure Emulator
 ecf/
 rcf/
+
+# Microsoft Azure ApplicationInsights config file
+ApplicationInsights.config
 
 # Windows Store app package directory
 AppPackages/
@@ -200,8 +202,6 @@ UpgradeLog*.XML
 UpgradeLog*.htm
 
 # SQL Server files
-*.mdf
-*.ldf
 
 # Business Intelligence projects
 *.rdl.data
@@ -240,3 +240,13 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
+/DebateScheduler/bin/roslyn
+/DebateScheduler/bin/DebateScheduler.dll.config
+/DebateScheduler/bin/DebateScheduler.dll
+/DebateScheduler/bin/Microsoft.CodeDom.Providers.DotNetCompilerPlatform.xml
+/DebateScheduler/bin/Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll
+/DebateSchedulerFinal/bin/roslyn
+/DebateSchedulerFinal/bin/Microsoft.CodeDom.Providers.DotNetCompilerPlatform.xml
+/DebateSchedulerFinal/bin/Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll
+/DebateSchedulerFinal/bin/DebateSchedulerFinal.dll.config
+/DebateSchedulerFinal/bin/DebateSchedulerFinal.dll
