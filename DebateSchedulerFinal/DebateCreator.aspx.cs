@@ -41,6 +41,10 @@ namespace DebateSchedulerFinal
             {
                 AddTeamButton(i);
             }
+
+            if (!IsPostBack && currentTeam > 2)
+                DropDownList_Teams.Items.FindByValue((currentTeam.ToString())).Selected = true;
+            //DropDownList_Teams.Items.FindByValue((numbTeams.ToString())).Selected = true;
         }
 
         protected void Calendar_Start_DayRender(object sender, DayRenderEventArgs e)
@@ -195,7 +199,7 @@ namespace DebateSchedulerFinal
                 }
 
                 int seasonID;
-                DebateSeason newSeason = new DebateSeason(0, false, teams, debates);
+                DebateSeason newSeason = new DebateSeason(0, false, teams, debates, startDate, seasonLength);
                 //int test = DatabaseHandler.GetLatestSeasonID();
                 DatabaseHandler.AddDebateSeason(Session, newSeason, out seasonID);
 
@@ -207,6 +211,12 @@ namespace DebateSchedulerFinal
 
         }
 
-
+        protected void Button_MakeTeams_Click(object sender, EventArgs e)
+        {
+            int val = int.Parse(DropDownList_Teams.SelectedValue);
+            currentTeam = val;
+            
+            Response.Redirect("DebateCreator.aspx?teams=" + currentTeam);
+        }
     }
 }

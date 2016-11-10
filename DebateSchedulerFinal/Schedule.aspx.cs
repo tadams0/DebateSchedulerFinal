@@ -26,7 +26,17 @@ namespace DebateSchedulerFinal
         private OrderBy order = OrderBy.Ascending;
         private DebateOrderVar dOrder = DebateOrderVar.Date;
 
+        private DebateSeason debateSeason;
         private List<Debate> debates = new List<Debate>();
+        private List<Team> teams = new List<Team>();
+
+        private int seasonLength;
+        private DateTime seasonStart;
+
+        private int dateOrder = 0;
+        private DateTime searchDate;
+        private int teamOrder = 0;
+        private string searchName = string.Empty;
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -38,6 +48,8 @@ namespace DebateSchedulerFinal
                 NameValueCollection queryValues = HttpUtility.ParseQueryString(Request.QueryString.ToString());
                 string orderString = queryValues.Get("Order");
                 string debateOrderString = queryValues.Get("dOrder");
+                string dateOrderString = queryValues.Get("date");
+                string teamOrderString = queryValues.Get("team");
 
                 if (orderString != null)
                 {
@@ -48,23 +60,106 @@ namespace DebateSchedulerFinal
                     dOrder = (DebateOrderVar)(int.Parse(debateOrderString));
                 }
 
+                debateSeason = DatabaseHandler.GetDebateSeason(currentDebateID);
 
-                debates = DatabaseHandler.GetDebateSeasonDebates(currentDebateID);
+                if (dateOrderString != null)
+                {
+                    int val;
+                    bool result = int.TryParse(dateOrderString, out val);
+                    if (result && val > 0 && val <= debateSeason.Length)
+                    {
+                        dateOrder = val;
+                    }
+                }
+                if (teamOrderString != null)
+                {
+                    int val;
+                    bool result = int.TryParse(teamOrderString, out val);
+                    if (result && val > 0 && val <= debateSeason.Teams.Count)
+                    {
+                        teamOrder = val;
+                    }
+                }
+                
+                debates = debateSeason.Debates;
 
                 debates = Help.OrderDebates(order, dOrder, debates);
 
                 TableRow header = CreateHeaderRow();
                 Table1.Rows.Add(header);
 
-                foreach (Debate d in debates)
-                {
-                    TableRow debateRow = CreateDebateRow(d);
-                    Table1.Rows.Add(debateRow);
+                seasonStart = DatabaseHandler.GetDebateSeasonDateTime(currentDebateID, out seasonLength);
 
+                DateTime currentDate = seasonStart;
+                for (int i = 1; i <= seasonLength; i++)
+                {
+                    string val = i.ToString();
+                    ListItem dateItem = new ListItem(currentDate.ToString("MM/dd/yy"), val);
+                    DropDownList_Date.Items.Add(dateItem);
+                    currentDate = currentDate.AddDays(7);
+                }
+
+                teams = debateSeason.Teams;
+
+                for (int i = 0; i < teams.Count; i++)
+                {
+                    string val = (i + 1).ToString();
+                    ListItem teamItem = new ListItem(teams[i].Name, val);
+                    DropDownList_TeamName.Items.Add(teamItem);
+                }
+
+                int addedRows = 0;
+                //Adding the debates to the table
+                if (!IsPostBack && (teamOrder > 0 || dateOrder > 0))
+                {
+                    if (teamOrder > 0)
+                    {
+                        searchName = teams[(teamOrder - 1)].Name;
+                        DropDownList_TeamName.Items.FindByValue((teamOrder.ToString())).Selected = true;
+                    }
+                    if (dateOrder > 0)
+                    {
+                        searchDate = seasonStart.AddDays((dateOrder - 1) * 7);
+                        DropDownList_Date.Items.FindByValue((dateOrder.ToString())).Selected = true;
+                    }
+
+                    foreach (Debate d in debates)
+                    {
+                        if (dateOrder == 0 || (d.Date.Month == searchDate.Month &&
+                            d.Date.Day == searchDate.Day &&
+                            d.Date.Year == searchDate.Year))
+                        {
+                            if (teamOrder == 0 || (d.Team1.Name == searchName ||
+                                d.Team2.Name == searchName))
+                            {
+                                TableRow debateRow = CreateDebateRow(d);
+                                Table1.Rows.Add(debateRow);
+                                addedRows++;
+                            }
+                        }
+                        
+                    }
+                }
+                else
+                {
+                    foreach (Debate d in debates)
+                    {
+
+                        TableRow debateRow = CreateDebateRow(d);
+                        Table1.Rows.Add(debateRow);
+                        addedRows++;
+                    }
+                }
+                if (addedRows <= 0)
+                {
+                    Table1.Visible = false;
+                    Panel_NoDebate.Visible = true;
+                    Label_NoSchedule.Text = "No results match your search.";
                 }
             }
             else
             {
+                Panel_Searching.Visible = false;
                 Panel_NoDebate.Visible = true;
             }
 
@@ -259,6 +354,9 @@ namespace DebateSchedulerFinal
                 queryValues.Set("Order", ((int)OrderBy.Ascending).ToString());
             }
 
+            queryValues.Set("date", dateOrder.ToString());
+            queryValues.Set("team", teamOrder.ToString());
+
             string url = Request.Url.AbsolutePath;
             Response.Redirect(url + "?" + queryValues);
         }
@@ -281,6 +379,20 @@ namespace DebateSchedulerFinal
                 e.Day.IsSelectable = false;
                 e.Cell.BackColor = System.Drawing.Color.GhostWhite;
             }
+        }
+
+        protected void Button_Search_Click(object sender, EventArgs e)
+        {
+            NameValueCollection queryValues = HttpUtility.ParseQueryString(Request.QueryString.ToString());
+
+            dateOrder = int.Parse(DropDownList_Date.SelectedValue);
+            teamOrder = int.Parse(DropDownList_TeamName.SelectedValue);
+
+            queryValues.Set("date", dateOrder.ToString());
+            queryValues.Set("team", teamOrder.ToString());
+
+            string url = Request.Url.AbsolutePath;
+            Response.Redirect(url + "?" + queryValues);
         }
     }
 }

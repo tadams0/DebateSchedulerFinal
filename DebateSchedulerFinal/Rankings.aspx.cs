@@ -18,7 +18,8 @@ namespace DebateSchedulerFinal
         private readonly Color headerTableTextColor = Color.White;
 
         private OrderBy order = OrderBy.Ascending;
-        private TeamOrderVar teamOrder = TeamOrderVar.Name;
+        private TeamOrderVar teamOrder = TeamOrderVar.Rank;
+        private List<Team> teams;
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -29,7 +30,7 @@ namespace DebateSchedulerFinal
                 //Gathering query values
                 NameValueCollection queryValues = HttpUtility.ParseQueryString(Request.QueryString.ToString());
                 string orderString = queryValues.Get("Order");
-                string teamOrderString = queryValues.Get("TeamOrder");
+                string teamOrderString = queryValues.Get("OrderTeams");
 
                 if (orderString != null)
                 {
@@ -40,7 +41,8 @@ namespace DebateSchedulerFinal
                     teamOrder = (TeamOrderVar)(int.Parse(teamOrderString));
                 }
 
-                List<Team> teams = DatabaseHandler.GetDebateSeasonTeams(currentDebateID);
+                teams = DatabaseHandler.GetDebateSeasonTeams(currentDebateID);
+                teams = Help.RankTeams(teams);
 
                 teams = Help.OrderTeams(order, teamOrder, teams);
 
@@ -128,7 +130,7 @@ namespace DebateSchedulerFinal
 
         private void RankButton_Command(object sender, CommandEventArgs e)
         {
-            throw new NotImplementedException();
+            RedirectWithParameters(TeamOrderVar.Rank);
         }
 
         private void TotalScoreButton_Command(object sender, CommandEventArgs e)
@@ -192,7 +194,7 @@ namespace DebateSchedulerFinal
             tieCell.Width = statsCellWidth;
             totalScore.Width = statsCellWidth;
 
-            rankCell.Text = rank.ToString();
+            rankCell.Text = t.Rank.ToString();
             nameCell.Text = t.Name;
             winCell.Text = t.Wins.ToString();
             lossCell.Text = t.Losses.ToString();

@@ -13,22 +13,27 @@
         }
         .auto-style6 {
             height: 27px;
+            width: 617px;
+        }
+        .auto-style7 {
+            width: 616px;
         }
     </style>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="mainContent" runat="server">
     <link rel ="stylesheet" href ="NewsStyle.css" type ="text/css" /> <!--This is the stylesheet which is used by the debate scheduling page.-->
-    <div id ="MainPanel">
+    <div id ="MainPanel" >
         <asp:Panel ID="Panel_Main" runat="server" HorizontalAlign="Center">
             <asp:Label ID="Label_ScheduleGenerator" runat="server" Font-Size="X-Large" Text="Schedule Generator" ></asp:Label>
             <div id ="mainTable">
-                <table border="1" style="width: 90%;" id ="tableHeader">
+                <table border="1" style="width: 100%;" id ="tableHeader">
                 <tr>
                     <td class="auto-style4">Schedule Info</td>
                     <td class="auto-style6">Teams</td>
                 </tr>
             </table>
-            <table border="1" style="width: 90%;" id ="tableContent">
+
+            <table border="1" style="width: 100%;" id ="tableContent">
                 <tr>
                     <td class="auto-style3">
                         <div id="calendars" class="auto-style5" style="margin-left:auto; margin-right:auto; ">
@@ -53,11 +58,28 @@
                             <br />
                         </div>
                     </td>
-                    <td valign="top" align ="left">
+                    <td valign="top" align ="left" class="auto-style7">
                         <asp:Panel ID="Panel_Teams" runat="server">
                             <br />
-                            <asp:Button ID="Button_AddTeam" runat="server" OnClick="Button_AddTeam_Click" Text="Add Team" />
-                            <asp:Button ID="Button_Remove" runat="server" OnClick="Button_RemoveTeam_Click" Text="Remove Team" />
+                            <asp:Button ID="Button_AddTeam" runat="server" OnClick="Button_AddTeam_Click" Text="Add Team" Visible="False" />
+                            <asp:Button ID="Button_Remove" runat="server" OnClick="Button_RemoveTeam_Click" Text="Remove Team" Visible="False" />
+                            <asp:Panel ID="Panel_TeamGenerating" runat="server">
+                                <br />
+                                <asp:DropDownList ID="DropDownList_Teams" runat="server" Width="100px">
+                                    <asp:ListItem Value="2"></asp:ListItem>
+                                    <asp:ListItem Value="3"></asp:ListItem>
+                                    <asp:ListItem Value="4"></asp:ListItem>
+                                    <asp:ListItem Value="5"></asp:ListItem>
+                                    <asp:ListItem Value="6"></asp:ListItem>
+                                    <asp:ListItem Value="7"></asp:ListItem>
+                                    <asp:ListItem Value="8"></asp:ListItem>
+                                    <asp:ListItem Value="9"></asp:ListItem>
+                                    <asp:ListItem Value="10"></asp:ListItem>
+                                </asp:DropDownList>
+                                <asp:Label ID="Label_Teams" runat="server" Text="Teams"></asp:Label>
+                                <br />
+                                <asp:Button ID="Button_MakeTeams" runat="server" OnClick="Button_MakeTeams_Click" Text="Make Teams" />
+                            </asp:Panel>
                         </asp:Panel>
                     </td>
                 </tr>

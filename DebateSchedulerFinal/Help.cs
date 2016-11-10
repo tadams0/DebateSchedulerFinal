@@ -20,7 +20,7 @@ namespace DebateSchedulerFinal
         private static readonly string DateFormat = "O";
         public static readonly string scheduleURL = "Schedule.aspx";
         public static readonly string debateCreatorURL = "DebateCreator.aspx";
-        public static readonly string letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        public static readonly string letters = "abcdefghijklmnopqrstuvwxyz"; //ABCDEFGHIJKLMNOPQRSTUVWXYZ capitalized letters were removed for simpler codes.
         public static readonly string numbers = "1234567890";
         public static readonly string specialCharacters = "!@#$%^&*?/";
         public static readonly Random rand = new Random();
@@ -190,6 +190,11 @@ namespace DebateSchedulerFinal
                         return teams.OrderBy(o => o.TotalScore).ToList();
                     else
                         return teams.OrderByDescending(o => o.TotalScore).ToList();
+                case TeamOrderVar.Rank:
+                    if (order == OrderBy.Ascending)
+                        return teams.OrderBy(o => o.Rank).ToList();
+                    else
+                        return teams.OrderByDescending(o => o.Rank).ToList();
             }
             
 
@@ -740,5 +745,34 @@ namespace DebateSchedulerFinal
             }
             return teamList;
         }
+
+        /// <summary>
+        /// Orders a list of teams by their wins and total score.
+        /// </summary>
+        /// <param name="teams">The list of teams.</param>
+        /// <returns>Returns an ordered list.</returns>
+        public static List<Team> RankTeams(List<Team> teams)
+        {
+            List<Team> result = teams.OrderBy(o => o.Wins).ThenBy(o => o.TotalScore).ToList();
+            result.Reverse();
+
+            int currentRank = 1;
+            for (int i = 0; i < result.Count - 1; i++)
+            {
+                result[i].Rank = currentRank;
+                if (result[i].Wins != result[i + 1].Wins ||
+                        result[i].TotalScore != result[i + 1].TotalScore) //If the wins or the total score is not the same.
+                {
+                    currentRank++;
+                }
+            }
+
+            //Now we order the last item
+            result[result.Count - 1].Rank = currentRank;
+
+
+            return result;
+        }
+
     }
 }
