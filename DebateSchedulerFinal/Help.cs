@@ -494,23 +494,23 @@ namespace DebateSchedulerFinal
                 }
             }
 
-           int datePairIndex = -1;
-            int pos1 = -1;
-            do
-            {
-                FindConflict(datePairs, out datePairIndex, out pos1);
-                if (datePairIndex != -1)
-                {
-                    bool replaced = ReplaceConflict(datePairs, datePairIndex, pos1);
-                    if (!replaced)
-                    {
-                        datePairs[datePairIndex][pos1].MorningDebate = !datePairs[datePairIndex][pos1].MorningDebate;
-                        bool result = ReplaceConflict(datePairs, datePairIndex, pos1);
-                        if (!result)
-                            break; //Test
-                    }
-                }
-            } while (datePairIndex != -1);
+           //int datePairIndex = -1;
+           // int pos1 = -1;
+           // do
+           // {
+           //     FindConflict(datePairs, out datePairIndex, out pos1);
+           //     if (datePairIndex != -1)
+           //     {
+           //         bool replaced = ReplaceConflict(datePairs, datePairIndex, pos1);
+           //         if (!replaced)
+           //         {
+           //             datePairs[datePairIndex][pos1].MorningDebate = !datePairs[datePairIndex][pos1].MorningDebate;
+           //             bool result = ReplaceConflict(datePairs, datePairIndex, pos1);
+           //             if (!result)
+           //                 break; //Test
+           //         }
+           //     }
+           // } while (datePairIndex != -1);
 
             teamPairs.Clear();
             teamPairs = new List<TeamPair>((n * (n - 1)) / 2);

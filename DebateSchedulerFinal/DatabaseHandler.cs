@@ -1218,8 +1218,6 @@ namespace DebateSchedulerFinal
                             {
                                 debate.Team1.TotalScore -= previousDebateData.Team1Score;
                                 debate.Team2.TotalScore -= previousDebateData.Team2Score;
-                                debate.Team1.TotalScore += debate.Team1Score;
-                                debate.Team2.TotalScore += debate.Team2Score;
                                 if (previousDebateData.Team2Score > previousDebateData.Team1Score) //Team 2 won last time..
                                 {
                                     debate.Team2.Wins--;
@@ -1229,6 +1227,11 @@ namespace DebateSchedulerFinal
                                 {
                                     debate.Team1.Ties--;
                                     debate.Team2.Ties--;
+                                }
+                                else //Team 1 won last time too, so we do not update the wins/losses.
+                                {
+                                    debate.Team1.Wins--;
+                                    debate.Team2.Losses--;
                                 }
                             }
                             UpdateTeam(session, debate.Team1);
@@ -1257,6 +1260,11 @@ namespace DebateSchedulerFinal
                                     debate.Team1.Ties--;
                                     debate.Team2.Ties--;
                                 }
+                                else //Team 2 won last time too, so we do not update the wins/losses.
+                                {
+                                    debate.Team2.Wins--;
+                                    debate.Team1.Losses--;
+                                }
                             }
                             UpdateTeam(session, debate.Team1);
                             UpdateTeam(session, debate.Team2);
@@ -1281,6 +1289,11 @@ namespace DebateSchedulerFinal
                                 {
                                     debate.Team1.Losses--;
                                     debate.Team2.Wins--;
+                                }
+                                else //Team 2 and 1 tied last time too so we do not update the ties.
+                                {
+                                    debate.Team2.Ties--;
+                                    debate.Team1.Ties--;
                                 }
                             }
                             UpdateTeam(session, debate.Team1);
