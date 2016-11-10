@@ -1,0 +1,1 @@
+Username: admin Message: "admin added a new news post with parameters { News Post Created By: admin on 11/9/2016 7:25:35 PM }." Logged at 11/9/2016 7:25:35 PM server time.
