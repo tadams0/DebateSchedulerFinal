@@ -1189,7 +1189,7 @@ namespace DebateSchedulerFinal
                     team1Score.Value = debate.Team1Score;
                     SqlParameter team2Score = new SqlParameter("@Team2Score", SqlDbType.Int);
                     team2Score.Value = debate.Team2Score;
-
+                    
                     byte bitValue = 0;
                     if (debate.MorningDebate)
                         bitValue = 1;
@@ -1206,6 +1206,87 @@ namespace DebateSchedulerFinal
 
                     if (result != null)
                     {
+                        //Updating the team's wins/ties/losses
+                        if (debate.Team1Score > debate.Team2Score) //team 1 wins
+                        {
+                            debate.Team1.TotalScore += debate.Team1Score;
+                            debate.Team2.TotalScore += debate.Team2Score;
+                            debate.Team1.Wins++;
+                            debate.Team2.Losses++;
+                            if (previousDebateData.Team1Score >= 0
+                                && previousDebateData.Team2Score >= 0) //There was a score, now we need to fix the scores.
+                            {
+                                debate.Team1.TotalScore -= previousDebateData.Team1Score;
+                                debate.Team2.TotalScore -= previousDebateData.Team2Score;
+                                debate.Team1.TotalScore += debate.Team1Score;
+                                debate.Team2.TotalScore += debate.Team2Score;
+                                if (previousDebateData.Team2Score > previousDebateData.Team1Score) //Team 2 won last time..
+                                {
+                                    debate.Team2.Wins--;
+                                    debate.Team1.Losses--;
+                                }
+                                else if (previousDebateData.Team1Score == previousDebateData.Team2Score) //There was a tie last time..
+                                {
+                                    debate.Team1.Ties--;
+                                    debate.Team2.Ties--;
+                                }
+                            }
+                            UpdateTeam(session, debate.Team1);
+                            UpdateTeam(session, debate.Team2);
+                        }
+                        else if (debate.Team1Score < debate.Team2Score) //team 2 wins
+                        {
+                            debate.Team2.TotalScore += debate.Team2Score;
+                            debate.Team1.TotalScore += debate.Team1Score;
+                            debate.Team2.Wins++;
+                            debate.Team1.Losses++;
+
+                            if (previousDebateData.Team1Score >= 0
+                                && previousDebateData.Team2Score >= 0) //There was a score, now we need to fix the scores.
+                            {
+                                debate.Team1.TotalScore -= previousDebateData.Team1Score;
+                                debate.Team2.TotalScore -= previousDebateData.Team2Score;
+
+                                if (previousDebateData.Team1Score > previousDebateData.Team2Score) //Team 1 won last time..
+                                {
+                                    debate.Team1.Wins--;
+                                    debate.Team2.Losses--;
+                                }
+                                else if (previousDebateData.Team1Score == previousDebateData.Team2Score) //There was a tie last time..
+                                {
+                                    debate.Team1.Ties--;
+                                    debate.Team2.Ties--;
+                                }
+                            }
+                            UpdateTeam(session, debate.Team1);
+                            UpdateTeam(session, debate.Team2);
+                        }
+                        else //Tie
+                        {
+                            debate.Team2.TotalScore += debate.Team2Score;
+                            debate.Team1.TotalScore += debate.Team1Score;
+                            debate.Team1.Ties++;
+                            debate.Team2.Ties++;
+                            if (previousDebateData.Team1Score >= 0
+                                && previousDebateData.Team2Score >= 0) //There was a score, now we need to fix the scores.
+                            {
+                                debate.Team1.TotalScore -= previousDebateData.Team1Score;
+                                debate.Team2.TotalScore -= previousDebateData.Team2Score;
+                                if (previousDebateData.Team1Score > previousDebateData.Team2Score) //Team 1 won last time..
+                                {
+                                    debate.Team1.Wins--;
+                                    debate.Team2.Losses--;
+                                }
+                                else if (previousDebateData.Team1Score < previousDebateData.Team2Score) //Team 2 won last time..
+                                {
+                                    debate.Team1.Losses--;
+                                    debate.Team2.Wins--;
+                                }
+                            }
+                            UpdateTeam(session, debate.Team1);
+                            UpdateTeam(session, debate.Team2);
+                        }
+
                         Log(updatingUser.Username,
                             updatingUser.Username + " updated a debate from " + previousDebateData.ToString() + " to " + debate.ToString());
 

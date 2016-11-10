@@ -47,9 +47,9 @@ namespace DebateSchedulerFinal
                 TableRow header = CreateHeaderRow();
                 Table1.Rows.Add(header);
 
-                foreach (Team t in teams)
+                for (int i = 0; i < teams.Count; i++)
                 {
-                    TableRow teamRow = CreateTeamRow(t);
+                    TableRow teamRow = CreateTeamRow(teams[i], i);
                     Table1.Rows.Add(teamRow);
                 }
             }
@@ -65,17 +65,24 @@ namespace DebateSchedulerFinal
         {
             TableRow row = new TableRow();
 
+            TableCell rankCell = new TableCell();
             TableCell nameCell = new TableCell();
             TableCell winCell = new TableCell();
             TableCell lossCell = new TableCell();
             TableCell tieCell = new TableCell();
             TableCell totalScore = new TableCell();
 
+            rankCell.BackColor = headerTableColor;
             nameCell.BackColor = headerTableColor;
             winCell.BackColor = headerTableColor;
             lossCell.BackColor = headerTableColor;
             tieCell.BackColor = headerTableColor;
             totalScore.BackColor = headerTableColor;
+
+            LinkButton rankButton = new LinkButton();
+            rankButton.Command += RankButton_Command;
+            rankButton.ForeColor = headerTableTextColor;
+            rankButton.Text = "Rank";
 
             LinkButton nameButton = new LinkButton();
             nameButton.Command += NameButton_Command;
@@ -102,12 +109,14 @@ namespace DebateSchedulerFinal
             totalScoreButton.ForeColor = headerTableTextColor;
             totalScoreButton.Text = "Total Score";
 
+            rankCell.Controls.Add(rankButton);
             nameCell.Controls.Add(nameButton);
             winCell.Controls.Add(winButton);
             lossCell.Controls.Add(lossButton);
             tieCell.Controls.Add(tieButton);
             totalScore.Controls.Add(totalScoreButton);
 
+            row.Cells.Add(rankCell);
             row.Cells.Add(nameCell);
             row.Cells.Add(winCell);
             row.Cells.Add(lossCell);
@@ -115,6 +124,11 @@ namespace DebateSchedulerFinal
             row.Cells.Add(totalScore);
 
             return row;
+        }
+
+        private void RankButton_Command(object sender, CommandEventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         private void TotalScoreButton_Command(object sender, CommandEventArgs e)
@@ -160,28 +174,32 @@ namespace DebateSchedulerFinal
             Response.Redirect(url + "?" + queryValues);
         }
 
-        private TableRow CreateTeamRow(Team t)
+        private TableRow CreateTeamRow(Team t, int rank )
         {
             TableRow row = new TableRow();
 
+            TableCell rankCell = new TableCell();
             TableCell nameCell = new TableCell();
             TableCell winCell = new TableCell();
             TableCell lossCell = new TableCell();
             TableCell tieCell = new TableCell();
             TableCell totalScore = new TableCell();
 
+            rankCell.Width = statsCellWidth;
             nameCell.Width = nameCellWidth;
             winCell.Width = statsCellWidth;
             lossCell.Width = statsCellWidth;
             tieCell.Width = statsCellWidth;
             totalScore.Width = statsCellWidth;
 
+            rankCell.Text = rank.ToString();
             nameCell.Text = t.Name;
             winCell.Text = t.Wins.ToString();
             lossCell.Text = t.Losses.ToString();
             tieCell.Text = t.Ties.ToString();
             totalScore.Text = t.TotalScore.ToString();
 
+            row.Cells.Add(rankCell);
             row.Cells.Add(nameCell);
             row.Cells.Add(winCell);
             row.Cells.Add(lossCell);

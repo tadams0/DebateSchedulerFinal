@@ -602,7 +602,7 @@ namespace DebateSchedulerFinal
         /// <param name="matchupList">The list of matches in a season.</param>
         /// <param name="teamList">The list of teams in a season.</param>
         /// <returns>Returns an ordered list of teams from highest to lowest score.</returns>
-        public static List<Team> SortScore(List<TeamPair> matchupList, List<Team> teamList)
+        public static List<Team> SortScore(List<Debate> matchupList, List<Team> teamList)
         {
             foreach (TeamPair i in matchupList)
             {
@@ -637,7 +637,7 @@ namespace DebateSchedulerFinal
         /// <param name="matchupList">The list of matches in a season.</param>
         /// <param name="teamList">The list of teams in a season.</param>
         /// <returns>Returns a list of teams with updated wins, losses, and ties.</returns>
-        public static List<Team> AssignResults(List<TeamPair> matchupList, List<Team> teamList)
+        public static List<Team> AssignResults(List<Debate> matchupList, List<Team> teamList)
         {
             foreach (TeamPair i in matchupList)
             {
@@ -723,7 +723,7 @@ namespace DebateSchedulerFinal
         /// <param name="matchupList">The list of matches in a season.</param>
         /// <param name="teamList">The list of teams in a season.</param>
         /// <returns>Returns a list of teams ordered primarily by scores and secondarily by wins</returns>
-        public static List<Team> WhoWins(List<TeamPair> matchupList,ref List<Team> teamList)
+        public static List<Team> WhoWins(List<Debate> matchupList,ref List<Team> teamList)
         {
             AssignResults(matchupList,teamList);
             SortScore(matchupList, teamList);

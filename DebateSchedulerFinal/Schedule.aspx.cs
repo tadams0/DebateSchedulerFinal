@@ -16,6 +16,7 @@ namespace DebateSchedulerFinal
         private const int statsCellWidth = 80;
         private const int dateCellWidth = 150;
         private const int vsCellWidth = 30;
+        private const string noScoreDisplay = "";
 
         private bool includeVs = true;
 
@@ -182,8 +183,16 @@ namespace DebateSchedulerFinal
 
             team1Cell.Text = d.Team1.Name;
             team2Cell.Text = d.Team2.Name;
-            team1ScoreCell.Text = d.Team1Score.ToString();
-            team2ScoreCell.Text = d.Team2Score.ToString();
+            if (d.Team1Score != -1)
+                team1ScoreCell.Text = d.Team1Score.ToString();
+            else
+                team1ScoreCell.Text = noScoreDisplay;
+
+            if (d.Team2Score != -1)
+                team2ScoreCell.Text = d.Team2Score.ToString();
+            else
+                team2ScoreCell.Text = noScoreDisplay;
+
             dateCell.Text = d.Date.ToString("MM/dd/yy");
 
             vsCell.Text = "vs";

@@ -187,6 +187,8 @@ namespace DebateSchedulerFinal
                 {
                     Debate debate = p as Debate;
                     int assignedID;
+                    debate.Team1Score = -1;
+                    debate.Team2Score = -1;
                     DatabaseHandler.AddDebate(Session, p, out assignedID);
                     debate.ID = assignedID;
                     debates.Add(debate);
