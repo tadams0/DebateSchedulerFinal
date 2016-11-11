@@ -5,6 +5,7 @@ using System.Web;
 
 namespace DebateSchedulerFinal
 {
+    [Serializable]
     /// <summary>
     /// Defines an object that holds information reguarding debate times, and teams involved.
     /// </summary>

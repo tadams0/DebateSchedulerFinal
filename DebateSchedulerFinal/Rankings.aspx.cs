@@ -199,7 +199,11 @@ namespace DebateSchedulerFinal
             winCell.Text = t.Wins.ToString();
             lossCell.Text = t.Losses.ToString();
             tieCell.Text = t.Ties.ToString();
-            totalScore.Text = t.TotalScore.ToString();
+
+            if (t.TotalScore >= 0)
+                totalScore.Text = t.TotalScore.ToString();
+            else
+                totalScore.Text = "0";
 
             row.Cells.Add(rankCell);
             row.Cells.Add(nameCell);

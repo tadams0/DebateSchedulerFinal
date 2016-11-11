@@ -13,6 +13,8 @@ namespace DebateSchedulerFinal
     /// </summary>
     public static class Help
     {
+        private static readonly int MaxMorningsPerDay = 5;
+        private static readonly int MaxAfternoonsPerDay = 5;
         private static readonly int MaximumTeams = 10;
         private static readonly int MaxTeamNameLength = 50;
         private static readonly int MinTeamNameLength = 3;
@@ -451,6 +453,99 @@ namespace DebateSchedulerFinal
             }
             return false;
         }
+        
+        /// <summary>
+        /// Orders the list of debates based on their dates.
+        /// </summary>
+        /// <param name="debates">The debates to list,</param>
+        /// <returns>Returns a dictionary which contains keys for each date, and the debates that are assigned that date.</returns>
+        public static List<List<Debate>> GetPairsByDate(List<Debate> debates)
+        {
+            //Organizing the teams based on their date...
+            List<List<Debate>> datePairs = new List<List<Debate>>();
+            //Assigning the dates...
+            for (int i = 0; i < debates.Count; i++)
+            {
+                bool added = false;
+                for (int j = 0; j < datePairs.Count; j++) //We must check to see if a list for this date already exists.
+                {
+                    if (datePairs[j][0].Date == debates[i].Date) //If the first item has the same date...
+                    {
+                        datePairs[j].Add(debates[i]); //We add the debate to it.
+                        added = true;
+                        break;
+                    }
+                }
+                if (!added)
+                {
+                    datePairs.Add(new List<Debate>()); //We add a new list.
+                    datePairs[datePairs.Count - 1].Add(debates[i]); //And add the debate to that.
+                }
+            }
+
+            return datePairs;
+        }
+
+        public static bool GetAvailableDate(List<Debate>[] datePairs, Debate d, out int listIndex, out bool morning)
+        {
+            int maxDebatesPerDay = MaxMorningsPerDay + MaxAfternoonsPerDay;
+            listIndex = -1;
+            morning = true;
+            int currentIndex = -1; //Though we may consider not using a foreach and a for instead so we keep track of the index.. I am keeping it for readability.
+            foreach (List<Debate> debateDay in datePairs)
+            {
+                currentIndex++;
+                if (debateDay.Count == 0)
+                {
+                    listIndex = currentIndex;
+                    return true;
+                }
+                else if (debateDay.Count < maxDebatesPerDay) //If there is an available day...
+                {
+                    bool morningTaken = false;
+                    bool afternoonTaken = false;
+                    bool conflict = false;
+                    for (int i = 0; i < debateDay.Count; i++) //We go through each debate on this day..
+                    {
+                        Team team1 = debateDay[i].Team1; //Get the team 1
+                        Team team2 = debateDay[i].Team2; //Get the team 2
+                        if (team1.ID == d.Team1.ID //We check if the ids between team 1 and 2 on both debates conflict
+                            || team1.ID == d.Team2.ID
+                            || team2.ID == d.Team1.ID
+                            || team2.ID == d.Team2.ID)
+                        {
+                            if (debateDay[i].MorningDebate) //We log whether it's a morning or afternoon that is taken.
+                                morningTaken = true;
+                            else
+                                afternoonTaken = true;
+                        }
+
+                        if (morningTaken && afternoonTaken) //Once both are taken we consider this day impossible to be free.
+                        {
+                            conflict = true;
+                            break; //And so we move on to the next day.
+                        }
+                    }
+
+                    if (!conflict) //If there was no conflict (and so either morning or afternoon is available)
+                    {
+                        if (morningTaken) //We check if the morning is impossible
+                        {
+                            morning = false; //We assign an afternoon time.
+                        }
+                        else if (afternoonTaken) //But if it was the afternoon that is impossible
+                        {
+                            morning = true; //We assign the morning.
+                        }
+                        listIndex = currentIndex;
+                        return true;
+                    }
+
+                }
+            }
+
+            return false;
+        }
 
         /// <summary>
         /// creates every match for the season.
@@ -458,7 +553,7 @@ namespace DebateSchedulerFinal
         /// <param name="Saturdays">The list of Saturdays in a season.</param>
         /// <param name="teamList">The list of teams in a season.</param>
         /// <returns>Returns a list of debates for the season.</returns>
-        public static List<TeamPair> MatchMake(List<DateTime> Saturdays, List<Team> teamList)
+        public static List<Debate> MatchMake(List<DateTime> Saturdays, List<Team> teamList)
         {
             //Assigning the pairs
             int n = teamList.Count;
@@ -473,277 +568,41 @@ namespace DebateSchedulerFinal
 
             teamPairs = teamPairs.OrderBy(a => a.PairID).ToList();
 
-            //Organizing the teams based on their date...
-            List<TeamPair>[] datePairs = new List<TeamPair>[Saturdays.Count];
-            //Assigning the dates...
-            int currentSat = 0;
-            for (int i = 0; i < teamPairs.Count; i++)
+            List<Debate>[] datePairs = new List<Debate>[Saturdays.Count];
+            for (int i = 0; i < datePairs.Length; i++)
             {
-                teamPairs[i].Date = Saturdays[currentSat];
-                if (datePairs[currentSat] == null)
-                    datePairs[currentSat] = new List<TeamPair>();
-                datePairs[currentSat].Add(teamPairs[i]);
-                currentSat++;
-                if (currentSat >= Saturdays.Count)
-                    currentSat = 0; 
+                datePairs[i] = new List<Debate>();
             }
 
-            //Assigning morning/afernoon debates alternating.
-            bool morning = true;
-            foreach (List<TeamPair> pairList in datePairs)
+            //We now find places for the debates.
+            foreach (Debate d in teamPairs)
             {
-                foreach (TeamPair p in pairList)
+                bool morning;
+                int index;
+                bool result = GetAvailableDate(datePairs, d, out index, out morning);
+                if (result)
                 {
-                    p.MorningDebate = morning;
-                    morning = !morning;
+                    d.MorningDebate = morning;
+                    d.Date = Saturdays[index];
+                    datePairs[index].Add(d);
                 }
-            }
-
-           //int datePairIndex = -1;
-           // int pos1 = -1;
-           // do
-           // {
-           //     FindConflict(datePairs, out datePairIndex, out pos1);
-           //     if (datePairIndex != -1)
-           //     {
-           //         bool replaced = ReplaceConflict(datePairs, datePairIndex, pos1);
-           //         if (!replaced)
-           //         {
-           //             datePairs[datePairIndex][pos1].MorningDebate = !datePairs[datePairIndex][pos1].MorningDebate;
-           //             bool result = ReplaceConflict(datePairs, datePairIndex, pos1);
-           //             if (!result)
-           //                 break; //Test
-           //         }
-           //     }
-           // } while (datePairIndex != -1);
-
-            teamPairs.Clear();
-            teamPairs = new List<TeamPair>((n * (n - 1)) / 2);
-            foreach (List<TeamPair> pairList in datePairs)
-            {
-                foreach (TeamPair p in pairList)
+                else 
                 {
-                    teamPairs.Add(p);
+                    //This is a problem...
                 }
             }
 
-            //Dictionary<int, int> prevTeams = new Dictionary<int, int>();
-            //int sat = 0;
-            //    foreach (TeamPair tp in teamPairs)
-            //    {
-            //        sat = 0;
-            //        int teamA = tp.Team1.ID;
-            //        int teamB = tp.Team2.ID;
-
-
-            //        if (teamA > 10) //This function makes sure the lists used below will function properly
-            //        {
-            //            teamA %= 10;
-            //            if (teamA > 0)
-            //                teamA -= 1;
-            //        }
-
-            //        if (teamB > 10) //This function makes sure the lists used below will function properly
-            //        {
-            //            teamB %= 10;
-            //            if (teamB > 0)
-            //                teamB -= 1;
-            //        }
-
-
-            //        if (prevTeams.ContainsKey(teamA))
-            //            prevTeams[teamA] += 1;
-            //        else
-            //            prevTeams[teamA] = 1;
-
-            //        if (prevTeams.ContainsKey(teamB))
-            //            prevTeams[teamB] += 1;
-            //        else
-            //            prevTeams[teamB] = 1;
-
-            //        int aVal = prevTeams[teamA] % 2;
-            //        int bVal = prevTeams[teamB] % 2;
-            //        if (aVal == 0)
-            //            aVal = 2;
-            //        if (bVal == 0)
-            //            bVal = 2;
-
-            //        if ((aVal + bVal) % 3 == 0)
-            //        {
-            //            tp.MorningDebate = false;
-            //        }
-            //        else if ((aVal + bVal) % 3 == 1)
-            //        {
-            //            tp.MorningDebate = false;
-            //        }
-            //        else if ((aVal + bVal) % 3 == 2)
-            //        {
-            //            tp.MorningDebate = true;
-            //        }
-
-            //        if (prevTeams[teamA] >= 3 || prevTeams[teamB] >= 3)
-            //        {
-            //            if (!((aVal + bVal) == 0))
-            //            {
-            //                if (aVal < bVal)
-            //                    sat += prevTeams[teamB];
-            //                else
-            //                    sat += prevTeams[teamA];
-            //            }
-            //        }
-
-            //        if (sat >= 10)
-            //        {
-            //            sat %= 10;
-            //        }
-            //        tp.Date = Saturdays[sat];
-            //    }
-            return (teamPairs);
-        }
-
-        /// <summary>
-        /// Sorts a list of teams by score.
-        /// </summary>
-        /// <param name="matchupList">The list of matches in a season.</param>
-        /// <param name="teamList">The list of teams in a season.</param>
-        /// <returns>Returns an ordered list of teams from highest to lowest score.</returns>
-        public static List<Team> SortScore(List<Debate> matchupList, List<Team> teamList)
-        {
-            foreach (TeamPair i in matchupList)
+            //We compile the debates into a single dimensional list.
+            List<Debate> finalList = new List<Debate>((n * (n - 1)) / 2);
+            foreach (List<Debate> pairList in datePairs)
             {
-                int j = 0, k = 0;
-                while (j <= teamList.Count)
+                foreach (Debate d in pairList)
                 {
-                    if (i.Team1.ID == teamList[j].ID)
-                    {
-                        teamList[j].TotalScore += i.Team1Score;
-                        break;
-                    }
-                    else
-                        j++;
-                }
-                while (k <= teamList.Count)
-                {
-                    if (i.Team2.ID == teamList[k].ID)
-                    {
-                        teamList[k].TotalScore += i.Team2Score;
-                        break;
-                    }
-                    else
-                        j++;
+                    finalList.Add(d);
                 }
             }
-            teamList = teamList.OrderBy(a => a.TotalScore).ToList();
-            return teamList;
-        }
-        /// <summary>
-        /// assigns wins, losses, and ties to each team.
-        /// </summary>
-        /// <param name="matchupList">The list of matches in a season.</param>
-        /// <param name="teamList">The list of teams in a season.</param>
-        /// <returns>Returns a list of teams with updated wins, losses, and ties.</returns>
-        public static List<Team> AssignResults(List<Debate> matchupList, List<Team> teamList)
-        {
-            foreach (TeamPair i in matchupList)
-            {
-                if (i.Team1Score > i.Team2Score)
-                {
-                    int j = 0, k = 0;
-                    while (j <= teamList.Count)
-                    {
-                        if (i.Team1.ID == teamList[j].ID)
-                        {
-                            teamList[j].Wins++;
-                            break;
-                        }
-                        else
-                            j++;
-                    }
-                    while (k <= teamList.Count)
-                    {
-                        if (i.Team2.ID == teamList[k].ID)
-                        {
-                            teamList[k].Losses++;
-                            break;
-                        }
-                        else
-                            j++;
-                    }
-                }
 
-                else if (i.Team1Score < i.Team2Score)
-                {
-                    int j = 0, k = 0;
-                    while (j <= teamList.Count)
-                    {
-                        if (i.Team1.ID == teamList[j].ID)
-                        {
-                            teamList[j].Losses++;
-                            break;
-                        }
-                        else
-                            j++;
-                    }
-                    while (k <= teamList.Count)
-                    {
-                        if (i.Team2.ID == teamList[k].ID)
-                        {
-                            teamList[k].Wins++;
-                            break;
-                        }
-                        else
-                            j++;
-                    }
-                }
-                else if (i.Team1Score == i.Team2Score)
-                {
-                    int j = 0, k = 0;
-                    while (j <= teamList.Count)
-                    {
-                        if (i.Team1.ID == teamList[j].ID)
-                        {
-                            teamList[j].Ties++;
-                            break;
-                        }
-                        else
-                            j++;
-                    }
-                    while (k <= teamList.Count)
-                    {
-                        if (i.Team2.ID == teamList[k].ID)
-                        {
-                            teamList[k].Ties++;
-                            break;
-                        }
-                        else
-                            j++;
-                    }
-                }
-            }
-            return teamList;
-        }
-        /// <summary>
-        /// Determines who wins based on score and wins.
-        /// </summary>
-        /// <param name="matchupList">The list of matches in a season.</param>
-        /// <param name="teamList">The list of teams in a season.</param>
-        /// <returns>Returns a list of teams ordered primarily by scores and secondarily by wins</returns>
-        public static List<Team> WhoWins(List<Debate> matchupList,ref List<Team> teamList)
-        {
-            AssignResults(matchupList,teamList);
-            SortScore(matchupList, teamList);
-            for (int i = 0; i <= teamList.Count; i++)
-            {
-                if (teamList[i].TotalScore == teamList[i+1].TotalScore)
-                    if (teamList[i+1].Wins > teamList[i].Wins)
-                    {
-                        Team temp = teamList[i];
-                        teamList[i] = teamList[i + 1];
-                        teamList[i + 1] = temp;
-                    }
-
-            }
-            return teamList;
+            return finalList;
         }
 
         /// <summary>

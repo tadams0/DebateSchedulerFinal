@@ -6,6 +6,7 @@ using System.Web;
 
 namespace DebateSchedulerFinal
 {
+    [Serializable]
     public class DebateSeason
     {
 

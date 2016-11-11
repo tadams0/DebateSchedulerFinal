@@ -90,6 +90,7 @@
             <br />
             
             <asp:Button ID="Button_CreateSchedule" runat="server" Text="Create Schedule" OnClick="Button_CreateSchedule_Click" />
+            <asp:Button ID="Button_AdminTool" runat="server" OnClick="Button_AdminTool_Click" Text="Test Tool" />
             <br />
             <br />
     </asp:Panel>
