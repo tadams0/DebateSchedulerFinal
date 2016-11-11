@@ -13,8 +13,8 @@ namespace DebateSchedulerFinal
     /// </summary>
     public static class Help
     {
-        private static readonly int MaxMorningsPerDay = 5;
-        private static readonly int MaxAfternoonsPerDay = 5;
+        private static readonly int MaxMorningsPerDay = 3;
+        private static readonly int MaxAfternoonsPerDay = 2;
         private static readonly int MaximumTeams = 10;
         private static readonly int MaxTeamNameLength = 50;
         private static readonly int MinTeamNameLength = 3;
@@ -379,113 +379,15 @@ namespace DebateSchedulerFinal
             } while (StartDate <= EndDate);
             return (dateList);
         }
-
-        private static void FindConflict(List<TeamPair>[] pairs, out int pairIndex, out int teamPairIndex)
-        {
-            pairIndex = -1;
-            teamPairIndex = -1;
-            for (int i  = 0; i < pairs.Length; i++)
-            {
-                List<TeamPair> datePair = pairs[i];
-
-                for (int j = 0; j < datePair.Count; j++)
-                {
-                    for (int k = 0; k < datePair.Count; k++)
-                    {
-                        if (k != j)
-                        {
-                            if (datePair[j].MorningDebate == datePair[k].MorningDebate)
-                            if (datePair[j].Team1.ID == datePair[k].Team1.ID ||
-                                datePair[j].Team1.ID == datePair[k].Team2.ID ||
-                                datePair[j].Team2.ID == datePair[k].Team1.ID ||
-                                datePair[j].Team2.ID == datePair[k].Team2.ID)
-                            {
-                                pairIndex = i;
-                                teamPairIndex = j;
-                                return;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        private static bool ReplaceConflict(List<TeamPair>[] pairs, int pairIndex, int teamPairIndex)
-        {
-            int maximumSize = pairs[0].Count;//test for now
-            TeamPair conflictingPair = pairs[pairIndex][teamPairIndex];
-
-            for (int i = 0; i < pairs.Length; i++)
-            {
-                List<TeamPair> datePair = pairs[i];
-                if (datePair.Count < maximumSize)
-                {
-                    datePair.Add(conflictingPair);
-                    pairs[pairIndex].RemoveAt(teamPairIndex);
-                }
-                else
-                {
-                    for (int j = 0; j < datePair.Count; j++)
-                    {
-                        //if (datePair[j].MorningDebate != conflictingPair.MorningDebate)
-                        //{
-                            if (datePair[j].Team1.ID == conflictingPair.Team1.ID &&
-                                datePair[j].Team2.ID == conflictingPair.Team1.ID &&
-                                datePair[j].Team1.ID == conflictingPair.Team2.ID &&
-                                datePair[j].Team2.ID == conflictingPair.Team2.ID)
-                            {
-                                break;
-                            }
-                            else if (j == datePair.Count - 1)
-                            {
-                                TeamPair temp = datePair[j];
-                                DateTime tempDate = datePair[j].Date;
-                                datePair[j] = conflictingPair;
-                                pairs[pairIndex][teamPairIndex] = temp;
-                                pairs[pairIndex][teamPairIndex].Date = conflictingPair.Date;
-                                datePair[j].Date = tempDate;
-                                return true;
-                            }
-                        //}
-                    }
-                }
-                
-            }
-            return false;
-        }
         
         /// <summary>
-        /// Orders the list of debates based on their dates.
+        /// Gets the first available date found in the list of date pairs.
         /// </summary>
-        /// <param name="debates">The debates to list,</param>
-        /// <returns>Returns a dictionary which contains keys for each date, and the debates that are assigned that date.</returns>
-        public static List<List<Debate>> GetPairsByDate(List<Debate> debates)
-        {
-            //Organizing the teams based on their date...
-            List<List<Debate>> datePairs = new List<List<Debate>>();
-            //Assigning the dates...
-            for (int i = 0; i < debates.Count; i++)
-            {
-                bool added = false;
-                for (int j = 0; j < datePairs.Count; j++) //We must check to see if a list for this date already exists.
-                {
-                    if (datePairs[j][0].Date == debates[i].Date) //If the first item has the same date...
-                    {
-                        datePairs[j].Add(debates[i]); //We add the debate to it.
-                        added = true;
-                        break;
-                    }
-                }
-                if (!added)
-                {
-                    datePairs.Add(new List<Debate>()); //We add a new list.
-                    datePairs[datePairs.Count - 1].Add(debates[i]); //And add the debate to that.
-                }
-            }
-
-            return datePairs;
-        }
-
+        /// <param name="datePairs">An array of lists where each list represents a new date.</param>
+        /// <param name="d">The debate trying to be added to the date pairs.</param>
+        /// <param name="listIndex">The index at which the debate can be added.</param>
+        /// <param name="morning">Whether or not the debate added needs to be morning or afternoon.</param>
+        /// <returns>Returns true if there was an available date, false otherwise.</returns>
         public static bool GetAvailableDate(List<Debate>[] datePairs, Debate d, out int listIndex, out bool morning)
         {
             int maxDebatesPerDay = MaxMorningsPerDay + MaxAfternoonsPerDay;
@@ -495,7 +397,7 @@ namespace DebateSchedulerFinal
             foreach (List<Debate> debateDay in datePairs)
             {
                 currentIndex++;
-                if (debateDay.Count == 0)
+                if (debateDay.Count == 0) //If there is no debate on this day then we go ahead and use this day.
                 {
                     listIndex = currentIndex;
                     return true;
@@ -566,12 +468,12 @@ namespace DebateSchedulerFinal
                 }
             }
 
-            teamPairs = teamPairs.OrderBy(a => a.PairID).ToList();
+            teamPairs = teamPairs.OrderBy(a => a.PairID).ToList(); //We shuffle the list of team pairs.
 
             List<Debate>[] datePairs = new List<Debate>[Saturdays.Count];
             for (int i = 0; i < datePairs.Length; i++)
             {
-                datePairs[i] = new List<Debate>();
+                datePairs[i] = new List<Debate>(); //We initialize a new list for each debate day.
             }
 
             //We now find places for the debates.
@@ -579,16 +481,16 @@ namespace DebateSchedulerFinal
             {
                 bool morning;
                 int index;
-                bool result = GetAvailableDate(datePairs, d, out index, out morning);
-                if (result)
+                bool result = GetAvailableDate(datePairs, d, out index, out morning); //This returns an available slot the debate can be placed at.
+                if (result) //There was an available slot.
                 {
-                    d.MorningDebate = morning;
-                    d.Date = Saturdays[index];
-                    datePairs[index].Add(d);
+                    d.MorningDebate = morning; //We set whether it's a morning or afternoon slot.
+                    d.Date = Saturdays[index]; //We set the date.
+                    datePairs[index].Add(d); //We then add the debate to the list so future debates being added are influenced.
                 }
-                else 
+                else //There was not an available slot.
                 {
-                    //This is a problem...
+                    //This is a problem... this is an impossible match up, too many teams or too few weeks.
                 }
             }
 
@@ -612,24 +514,23 @@ namespace DebateSchedulerFinal
         /// <returns>Returns an ordered list.</returns>
         public static List<Team> RankTeams(List<Team> teams)
         {
-            List<Team> result = teams.OrderBy(o => o.Wins).ThenBy(o => o.TotalScore).ToList();
-            result.Reverse();
+            List<Team> result = teams.OrderBy(o => o.Wins).ThenBy(o => o.TotalScore).ToList(); //We order the list by their wins, then by their total score.
+            result.Reverse(); //We reverse the list (so that the larger numbers are ranked toward the top).
 
-            int currentRank = 1;
-            for (int i = 0; i < result.Count - 1; i++)
+            int currentRank = 1; //We begin by setting the smallest rank to 1.
+            for (int i = 0; i < result.Count - 1; i++) //We skip the last result because there is no result after that so result[i + 1] will not work.
             {
-                result[i].Rank = currentRank;
+                result[i].Rank = currentRank; //We assign the current rank to this team.
                 if (result[i].Wins != result[i + 1].Wins ||
                         result[i].TotalScore != result[i + 1].TotalScore) //If the wins or the total score is not the same.
                 {
-                    currentRank++;
+                    currentRank++; //We increment the rank.
                 }
             }
 
-            //Now we order the last item
+            //Now we order the last item whose rank has already been incremented in the loop above.
             result[result.Count - 1].Rank = currentRank;
-
-
+            
             return result;
         }
 
