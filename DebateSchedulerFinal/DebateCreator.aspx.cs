@@ -20,7 +20,6 @@ namespace DebateSchedulerFinal
         {
             ((MasterPage)Master).SetPagePermissionLevel(3);
 
-
             string teams = Request.QueryString["teams"];
             int numbTeams = -1;
             bool result = int.TryParse(teams, out numbTeams);
@@ -41,6 +40,10 @@ namespace DebateSchedulerFinal
             {
                 AddTeamButton(i);
             }
+
+            if (!IsPostBack && currentTeam > 2)
+                DropDownList_Teams.Items.FindByValue((currentTeam.ToString())).Selected = true;
+            //DropDownList_Teams.Items.FindByValue((numbTeams.ToString())).Selected = true;
         }
 
         protected void Calendar_Start_DayRender(object sender, DayRenderEventArgs e)
@@ -180,20 +183,19 @@ namespace DebateSchedulerFinal
 
                 //Creating the actual debates
                 List<DateTime> saturdays = Help.SatBetween(startDate, endDate);
-                List<TeamPair> pairs = Help.MatchMake(saturdays, teams);
-                List<Debate> debates = new List<Debate>();
+                List<Debate> debates = Help.MatchMake(saturdays, teams);
 
-                foreach (TeamPair p in pairs)
+                foreach (Debate d in debates)
                 {
-                    Debate debate = p as Debate;
                     int assignedID;
-                    DatabaseHandler.AddDebate(Session, p, out assignedID);
-                    debate.ID = assignedID;
-                    debates.Add(debate);
+                    d.Team1Score = -1;
+                    d.Team2Score = -1;
+                    DatabaseHandler.AddDebate(Session, d, out assignedID);
+                    d.ID = assignedID;
                 }
 
                 int seasonID;
-                DebateSeason newSeason = new DebateSeason(0, false, teams, debates);
+                DebateSeason newSeason = new DebateSeason(0, false, teams, debates, startDate, seasonLength);
                 //int test = DatabaseHandler.GetLatestSeasonID();
                 DatabaseHandler.AddDebateSeason(Session, newSeason, out seasonID);
 
@@ -205,6 +207,54 @@ namespace DebateSchedulerFinal
 
         }
 
+        protected void Button_MakeTeams_Click(object sender, EventArgs e)
+        {
+            int val = int.Parse(DropDownList_Teams.SelectedValue);
+            currentTeam = val;
+            
+            Response.Redirect("DebateCreator.aspx?teams=" + currentTeam);
+        }
 
+        protected void Button_AdminTool_Click(object sender, EventArgs e)
+        {
+            DateTime startDate = new DateTime(2016, 11, 12);
+            int seasonLength = 10;
+            DateTime endDate = startDate.AddDays((seasonLength - 1) * 7);
+
+            List<Team> teams = new List<Team>();
+            for (int i = 1; i <= 10; i++)
+            {
+                teams.Add(new Team("Team " + i, 0, 0, 0, 0, 0));
+            }
+            //Adding the teams to the database
+            foreach (Team t in teams)
+            {
+                int id;
+                DatabaseHandler.AddTeam(Session, t, out id);
+                t.ID = id;
+            }
+
+            //Creating the actual debates
+            List<DateTime> saturdays = Help.SatBetween(startDate, endDate);
+            List<Debate> debates = Help.MatchMake(saturdays, teams);
+
+            foreach (Debate d in debates)
+            {
+                int assignedID;
+                d.Team1Score = -1;
+                d.Team2Score = -1;
+                DatabaseHandler.AddDebate(Session, d, out assignedID);
+                d.ID = assignedID;
+            }
+
+            int seasonID;
+            DebateSeason newSeason = new DebateSeason(0, false, teams, debates, startDate, seasonLength);
+            //int test = DatabaseHandler.GetLatestSeasonID();
+            DatabaseHandler.AddDebateSeason(Session, newSeason, out seasonID);
+
+            Help.SetDebateID(Application, seasonID);
+
+            Response.Redirect(Help.scheduleURL);
+        }
     }
 }

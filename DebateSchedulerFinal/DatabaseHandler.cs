@@ -73,7 +73,11 @@ namespace DebateSchedulerFinal
 
         private static int permissionToAddUserCodes = 3;
         private static int permissionToGetActiveUserCodes = 3;
+
+        private static int permissionToResetDatabase = 99; //The database can absolutely not be reset except in special circumstances.
         
+        
+
         /// <summary>
         /// Gets a data table in a database.
         /// </summary>
@@ -356,6 +360,51 @@ namespace DebateSchedulerFinal
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Resets all the tables in the database, excluding the ones given.
+        /// </summary>
+        /// <param name="session">The session deleting the database.</param>
+        /// <param name="connectionString">The connection string to the database to reset.</param>
+        /// <param name="excludedTables">The tables to exclude when resetting the database, enter none for an entire database whipe.</param>
+        /// <returns>Returns true if the database was successfully resetted. False if the database errored (this can result in a broken database).</returns>
+        private static bool ResetDatabase(HttpSessionState session, params string[] excludedTables)
+        {
+            User sessionUser = Help.GetUserSession(session);
+
+            if (sessionUser != null && sessionUser.PermissionLevel >= permissionToResetDatabase)
+            {
+                string[] tables = { "Debates", "News", "Seasons", "Teams", "UserCodes", "Users" };
+                foreach (string s in excludedTables)
+                {
+                    for (int i = tables.Length - 1; i >= 0; i--)
+                    {
+                        if (tables[i].ToUpperInvariant() == s.ToUpperInvariant())
+                        {
+                            tables[i] = null;
+                        }
+                    }
+                }
+                foreach (string table in tables)
+                {
+                    if (table != null)
+                    {
+                        SqlDataReader reader1 = ExecuteSQL(GetConnectionString(), "DROP TABLE " + table + ";", "exception occured while dropping the table " + table);
+                        if (reader1 != null)
+                        {
+                            SqlDataReader reader2 = ExecuteSQL(GetConnectionString(), "ALTER TABLE " + table + " AUTO_INCREMENT = 1", "exception occured while reseting the increment of the table " + table);
+                            if (reader2 != null)
+                            {
+                                Log(sessionUser, sessionUser.Username + " cleared and reset the table in the database called " + table + "!");
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -1189,7 +1238,7 @@ namespace DebateSchedulerFinal
                     team1Score.Value = debate.Team1Score;
                     SqlParameter team2Score = new SqlParameter("@Team2Score", SqlDbType.Int);
                     team2Score.Value = debate.Team2Score;
-
+                    
                     byte bitValue = 0;
                     if (debate.MorningDebate)
                         bitValue = 1;
@@ -1206,6 +1255,100 @@ namespace DebateSchedulerFinal
 
                     if (result != null)
                     {
+                        //Updating the team's wins/ties/losses
+                        if (debate.Team1Score > debate.Team2Score) //team 1 wins
+                        {
+                            debate.Team1.TotalScore += debate.Team1Score;
+                            debate.Team2.TotalScore += debate.Team2Score;
+                            debate.Team1.Wins++;
+                            debate.Team2.Losses++;
+                            if (previousDebateData.Team1Score >= 0
+                                && previousDebateData.Team2Score >= 0) //There was a score, now we need to fix the scores.
+                            {
+                                debate.Team1.TotalScore -= previousDebateData.Team1Score;
+                                debate.Team2.TotalScore -= previousDebateData.Team2Score;
+                                if (previousDebateData.Team2Score > previousDebateData.Team1Score) //Team 2 won last time..
+                                {
+                                    debate.Team2.Wins--;
+                                    debate.Team1.Losses--;
+                                }
+                                else if (previousDebateData.Team1Score == previousDebateData.Team2Score) //There was a tie last time..
+                                {
+                                    debate.Team1.Ties--;
+                                    debate.Team2.Ties--;
+                                }
+                                else //Team 1 won last time too, so we do not update the wins/losses.
+                                {
+                                    debate.Team1.Wins--;
+                                    debate.Team2.Losses--;
+                                }
+                            }
+                            UpdateTeam(session, debate.Team1);
+                            UpdateTeam(session, debate.Team2);
+                        }
+                        else if (debate.Team1Score < debate.Team2Score) //team 2 wins
+                        {
+                            debate.Team2.TotalScore += debate.Team2Score;
+                            debate.Team1.TotalScore += debate.Team1Score;
+                            debate.Team2.Wins++;
+                            debate.Team1.Losses++;
+
+                            if (previousDebateData.Team1Score >= 0
+                                && previousDebateData.Team2Score >= 0) //There was a score, now we need to fix the scores.
+                            {
+                                debate.Team1.TotalScore -= previousDebateData.Team1Score;
+                                debate.Team2.TotalScore -= previousDebateData.Team2Score;
+
+                                if (previousDebateData.Team1Score > previousDebateData.Team2Score) //Team 1 won last time..
+                                {
+                                    debate.Team1.Wins--;
+                                    debate.Team2.Losses--;
+                                }
+                                else if (previousDebateData.Team1Score == previousDebateData.Team2Score) //There was a tie last time..
+                                {
+                                    debate.Team1.Ties--;
+                                    debate.Team2.Ties--;
+                                }
+                                else //Team 2 won last time too, so we do not update the wins/losses.
+                                {
+                                    debate.Team2.Wins--;
+                                    debate.Team1.Losses--;
+                                }
+                            }
+                            UpdateTeam(session, debate.Team1);
+                            UpdateTeam(session, debate.Team2);
+                        }
+                        else //Tie
+                        {
+                            debate.Team2.TotalScore += debate.Team2Score;
+                            debate.Team1.TotalScore += debate.Team1Score;
+                            debate.Team1.Ties++;
+                            debate.Team2.Ties++;
+                            if (previousDebateData.Team1Score >= 0
+                                && previousDebateData.Team2Score >= 0) //There was a score, now we need to fix the scores.
+                            {
+                                debate.Team1.TotalScore -= previousDebateData.Team1Score;
+                                debate.Team2.TotalScore -= previousDebateData.Team2Score;
+                                if (previousDebateData.Team1Score > previousDebateData.Team2Score) //Team 1 won last time..
+                                {
+                                    debate.Team1.Wins--;
+                                    debate.Team2.Losses--;
+                                }
+                                else if (previousDebateData.Team1Score < previousDebateData.Team2Score) //Team 2 won last time..
+                                {
+                                    debate.Team1.Losses--;
+                                    debate.Team2.Wins--;
+                                }
+                                else //Team 2 and 1 tied last time too so we do not update the ties.
+                                {
+                                    debate.Team2.Ties--;
+                                    debate.Team1.Ties--;
+                                }
+                            }
+                            UpdateTeam(session, debate.Team1);
+                            UpdateTeam(session, debate.Team2);
+                        }
+
                         Log(updatingUser.Username,
                             updatingUser.Username + " updated a debate from " + previousDebateData.ToString() + " to " + debate.ToString());
 
@@ -1487,6 +1630,11 @@ namespace DebateSchedulerFinal
                 string teamsString = table.Rows[0]["Teams"] as string;
                 List<int> teamIDs = DebateSeason.ParseTeamString(teamsString);
 
+                string dateString = table.Rows[0]["StartDate"] as string;
+                DateTime date = Help.GetDate(dateString);
+
+                int length = (int)table.Rows[0]["Length"];
+
                 int id = (int)table.Rows[0]["Id"];
 
                 bool hasEnded = Convert.ToBoolean(table.Rows[0]["HasEnded"]);
@@ -1505,7 +1653,7 @@ namespace DebateSchedulerFinal
                     debates.Add(GetDebate(i));
                 }
 
-                resultingSeason = new DebateSeason(id, hasEnded, teams, debates);
+                resultingSeason = new DebateSeason(id, hasEnded, teams, debates, date, length);
             }
 
             return resultingSeason;
@@ -1549,6 +1697,28 @@ namespace DebateSchedulerFinal
             }
 
             return id;
+        }
+
+        /// <summary>
+        /// Gets the date and length of a debate season by id.
+        /// </summary>
+        /// <param name="id">The id of the debate season.</param>
+        /// <param name="length">The length of the debate season in weeks.</param>
+        /// <returns>Returns the date and length in weeks of the debate season. If the season does not exist or if there was an error, then length will be -1 and date will be DateTime.MinValue.</returns>
+        public static DateTime GetDebateSeasonDateTime(int id, out int length)
+        {
+            DateTime date = DateTime.MinValue;
+            length = -1;
+            DataTable table = GetDataTable(GetConnectionString(), "Seasons", "Id", id.ToString(), SqlDbType.Int, int.MaxValue, true, "exception occured while gathering a debate season.");
+
+            if (table.Rows.Count > 0)
+            {
+                string dateString = table.Rows[0]["StartDate"] as string;
+                date = Help.GetDate(dateString);
+                length = (int)table.Rows[0]["Length"];
+            }
+
+            return date;
         }
 
         /// <summary>
@@ -1620,6 +1790,11 @@ namespace DebateSchedulerFinal
                 string teamsString = table.Rows[0]["Teams"] as string;
                 List<int> teamIDs = DebateSeason.ParseTeamString(teamsString);
 
+                string dateString = table.Rows[0]["StartDate"] as string;
+                DateTime date = Help.GetDate(dateString);
+
+                int length = (int)table.Rows[0]["Length"];
+
                 bool hasEnded = Convert.ToBoolean(table.Rows[0]["HasEnded"]);
 
                 //Loading in the teams
@@ -1636,7 +1811,7 @@ namespace DebateSchedulerFinal
                     debates.Add(GetDebate(i));
                 }
 
-                resultingSeason = new DebateSeason(id, hasEnded, teams, debates);
+                resultingSeason = new DebateSeason(id, hasEnded, teams, debates, date, length);
             }
 
             return resultingSeason;
@@ -1654,11 +1829,12 @@ namespace DebateSchedulerFinal
 
             if (currentSessionUser != null && currentSessionUser.PermissionLevel >= permissionToAddSeasons && season != null) //If the given season is not null and proper permissions are matched.
             {
-                string sqlQuery = "INSERT INTO Seasons (Debates, Teams, HasEnded) VALUES " +
-                        "(@Debates, @Teams, @Ended)";
+                string sqlQuery = "INSERT INTO Seasons (Debates, Teams, HasEnded, StartDate, Length) VALUES " +
+                        "(@Debates, @Teams, @Ended, @Date, @Length)";
 
                 string debateString = season.GetDebateString();
                 string teamString = season.GetTeamString();
+                string dateString = Help.GetDateString(season.StartDate);
 
                 byte bitValue = 0;
                 if (season.HasEnded)
@@ -1670,9 +1846,13 @@ namespace DebateSchedulerFinal
                 teams.Value = teamString;
                 SqlParameter ended = new SqlParameter("@Ended", SqlDbType.Bit);
                 ended.Value = bitValue;
+                SqlParameter date = new SqlParameter("@Date", SqlDbType.NVarChar, dateString.Length);
+                date.Value = dateString;
+                SqlParameter length = new SqlParameter("@Length", SqlDbType.Int);
+                length.Value = season.Length;
 
                 SqlDataReader result = ExecuteSQL(GetConnectionString(), sqlQuery, "exception occured while adding a new debate season.",
-                    debates,teams, ended);
+                    debates,teams, ended, date, length);
 
                 if (result != null) //If the result is not null, then the query succeeded and should be logged.
                 {
@@ -1698,12 +1878,13 @@ namespace DebateSchedulerFinal
 
             if (currentSessionUser != null && currentSessionUser.PermissionLevel >= permissionToAddSeasons && season != null) //If the given season is not null and proper permissions are matched.
             {
-                string sqlQuery = "INSERT INTO Seasons (Debates, Teams, HasEnded) " +
+                string sqlQuery = "INSERT INTO Seasons (Debates, Teams, HasEnded, StartDate, Length) " +
                     "OUTPUT INSERTED.Id "+ 
-                        "VALUES(@Debates, @Teams, @Ended)";
+                        "VALUES(@Debates, @Teams, @Ended, @Date, @Length)";
 
                 string debateString = season.GetDebateString();
                 string teamString = season.GetTeamString();
+                string dateString = Help.GetDateString(season.StartDate);
 
                 byte bitValue = 0;
                 if (season.HasEnded)
@@ -1715,10 +1896,13 @@ namespace DebateSchedulerFinal
                 teams.Value = teamString;
                 SqlParameter ended = new SqlParameter("@Ended", SqlDbType.Bit);
                 ended.Value = bitValue;
-
+                SqlParameter date = new SqlParameter("@Date", SqlDbType.NVarChar, dateString.Length);
+                date.Value = dateString;
+                SqlParameter length = new SqlParameter("@Length", SqlDbType.Int);
+                length.Value = season.Length;
 
                 object result = ExecuteSQLScaler(GetConnectionString(), sqlQuery, "exception occured while adding a new debate season.",
-                    debates, teams, ended);
+                    debates, teams, ended, date, length);
 
                 if (result != null) //If the result is not null, then the query succeeded and should be logged.
                 {
@@ -1854,7 +2038,7 @@ namespace DebateSchedulerFinal
             User sessionUser = Help.GetUserSession(session);
             List<string> codes = new List<string>();
 
-            if (sessionUser != null && sessionUser.PermissionLevel >= permissionToAddUserCodes) //If the user exists and their permissions are high enough.
+            if (sessionUser != null && sessionUser.PermissionLevel >= permissionToGetActiveUserCodes) //If the user exists and their permissions are high enough.
             {
                 DataTable table = GetDataTable(GetConnectionString(), "UserCodes", "exception occured while gathering the user codes table.");
 

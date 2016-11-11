@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Drawing;
 using System.Linq;
+using System.Text;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -16,6 +17,7 @@ namespace DebateSchedulerFinal
         private const int statsCellWidth = 80;
         private const int dateCellWidth = 150;
         private const int vsCellWidth = 30;
+        private const string noScoreDisplay = "";
 
         private bool includeVs = true;
 
@@ -25,45 +27,176 @@ namespace DebateSchedulerFinal
         private OrderBy order = OrderBy.Ascending;
         private DebateOrderVar dOrder = DebateOrderVar.Date;
 
+        private DebateSeason debateSeason;
         private List<Debate> debates = new List<Debate>();
+        private List<Team> teams = new List<Team>();
+
+        private int seasonLength;
+        private DateTime seasonStart;
+
+        private int dateOrder = 0;
+        private DateTime searchDate;
+        private int teamOrder = 0;
+        private string searchName = string.Empty;
 
         protected void Page_Load(object sender, EventArgs e)
         {
             int currentDebateID = Help.GetDebateSeasonID(Application);
+            Panel_Searching.Visible = true;
+            Panel_NoDebate.Visible = false;
 
             if (currentDebateID != -1)
             {
                 //Gathering query values
-                NameValueCollection queryValues = HttpUtility.ParseQueryString(Request.QueryString.ToString());
-                string orderString = queryValues.Get("Order");
-                string debateOrderString = queryValues.Get("dOrder");
+                // NameValueCollection queryValues = HttpUtility.ParseQueryString(Request.QueryString.ToString());
+                // string orderString = queryValues.Get("Order");
+                // string debateOrderString = queryValues.Get("dOrder");
+                // string dateOrderString = queryValues.Get("date");
+                // string teamOrderString = queryValues.Get("team");
 
-                if (orderString != null)
+                object orderObj = ViewState["Order"];
+                object debateOrderObj = ViewState["dOrder"];
+                object dateOrderObj = ViewState["date"];
+                object teamOrderObj = ViewState["team"];
+
+                if (IsPostBack)
                 {
-                    order = (OrderBy)(int.Parse(orderString));
+
                 }
-                if (debateOrderString != null)
+
+                if (orderObj != null)
                 {
-                    dOrder = (DebateOrderVar)(int.Parse(debateOrderString));
+                    order = (OrderBy)(int.Parse(orderObj.ToString()));
                 }
+                if (debateOrderObj != null)
+                {
+                    dOrder = (DebateOrderVar)(int.Parse(debateOrderObj.ToString()));
+                }
+                
+                object savedSeason = ViewState["Season"];
 
+                if (savedSeason == null)
+                {
+                    debateSeason = DatabaseHandler.GetDebateSeason(currentDebateID);
+                }
+                else
+                    debateSeason = savedSeason as DebateSeason;
 
-                debates = DatabaseHandler.GetDebateSeasonDebates(currentDebateID);
+                ViewState["Season"] = debateSeason;
+
+                if (dateOrderObj != null)
+                {
+                    int val;
+                    bool result = int.TryParse(dateOrderObj.ToString(), out val);
+                    if (result && val > 0 && val <= debateSeason.Length)
+                    {
+                        dateOrder = val;
+                    }
+                }
+                if (teamOrderObj != null)
+                {
+                    int val;
+                    bool result = int.TryParse(teamOrderObj.ToString(), out val);
+                    if (result && val > 0 && val <= debateSeason.Teams.Count)
+                    {
+                        teamOrder = val;
+                    }
+                }
+                
+                debates = debateSeason.Debates;
 
                 debates = Help.OrderDebates(order, dOrder, debates);
 
                 TableRow header = CreateHeaderRow();
                 Table1.Rows.Add(header);
 
-                foreach (Debate d in debates)
-                {
-                    TableRow debateRow = CreateDebateRow(d);
-                    Table1.Rows.Add(debateRow);
+                seasonStart = debateSeason.StartDate;
+                seasonLength = debateSeason.Length;
 
+                DateTime currentDate = seasonStart;
+                
+                teams = debateSeason.Teams;
+
+                if (!IsPostBack) //We do not do this on page post backs (IE: After searches).
+                {
+                    //Creating the team drop down
+                    for (int i = 0; i < teams.Count; i++)
+                    {
+                        string val = (i + 1).ToString();
+                        ListItem teamItem = new ListItem(teams[i].Name, val);
+                        DropDownList_TeamName.Items.Add(teamItem);
+                    }
+
+                    //Creating the date drop down
+                    for (int i = 1; i <= seasonLength; i++)
+                    {
+                        string val = i.ToString();
+                        ListItem dateItem = new ListItem(currentDate.ToString("MM/dd/yy"), val);
+                        DropDownList_Date.Items.Add(dateItem);
+                        currentDate = currentDate.AddDays(7);
+                    }
+                }
+
+                int addedRows = 0;
+                //Adding the debates to the table
+                if ((teamOrder > 0 || dateOrder > 0))
+                {
+
+                    if (teamOrder > 0)
+                    {
+                        searchName = teams[(teamOrder - 1)].Name;
+                        if (!IsPostBack)
+                            DropDownList_TeamName.Items.FindByValue((teamOrder.ToString())).Selected = true;
+                    }
+                    if (dateOrder > 0)
+                    {
+                        searchDate = seasonStart.AddDays((dateOrder - 1) * 7);
+                        if (!IsPostBack)
+                            DropDownList_Date.Items.FindByValue((dateOrder.ToString())).Selected = true;
+                    }
+
+                    foreach (Debate d in debates)
+                    {
+                        if (dateOrder == 0 || (d.Date.Month == searchDate.Month &&
+                            d.Date.Day == searchDate.Day &&
+                            d.Date.Year == searchDate.Year))
+                        {
+                            if (teamOrder == 0 || (d.Team1.Name == searchName ||
+                                d.Team2.Name == searchName))
+                            {
+                                TableRow debateRow = CreateDebateRow(d);
+                                Table1.Rows.Add(debateRow);
+                                addedRows++;
+                            }
+                        }
+                        
+                    }
+                }
+                else
+                {
+                    foreach (Debate d in debates)
+                    {
+
+                        TableRow debateRow = CreateDebateRow(d);
+                        Table1.Rows.Add(debateRow);
+                        addedRows++;
+                    }
+                }
+                if (addedRows <= 0)
+                {
+                    Table1.Visible = false;
+                    Panel_NoDebate.Visible = true;
+                    Label_NoSchedule.Text = "No results match your search.";
+                }
+                else
+                {
+                    Table1.Visible = true;
+                    Panel_NoDebate.Visible = false;
                 }
             }
             else
             {
+                Panel_Searching.Visible = false;
                 Panel_NoDebate.Visible = true;
             }
 
@@ -182,8 +315,16 @@ namespace DebateSchedulerFinal
 
             team1Cell.Text = d.Team1.Name;
             team2Cell.Text = d.Team2.Name;
-            team1ScoreCell.Text = d.Team1Score.ToString();
-            team2ScoreCell.Text = d.Team2Score.ToString();
+            if (d.Team1Score >= 0)
+                team1ScoreCell.Text = d.Team1Score.ToString();
+            else
+                team1ScoreCell.Text = noScoreDisplay;
+
+            if (d.Team2Score >= 0)
+                team2ScoreCell.Text = d.Team2Score.ToString();
+            else
+                team2ScoreCell.Text = noScoreDisplay;
+
             dateCell.Text = d.Date.ToString("MM/dd/yy");
 
             vsCell.Text = "vs";
@@ -236,22 +377,29 @@ namespace DebateSchedulerFinal
             RedirectWithParameters(DebateOrderVar.Team1Name);
         }
 
+        /// <summary>
+        /// Refreshes the page with a new order for the table on page load.
+        /// </summary>
+        /// <param name="debateOrderVar"></param>
         private void RedirectWithParameters(DebateOrderVar debateOrderVar)
         {
-            NameValueCollection queryValues = HttpUtility.ParseQueryString(Request.QueryString.ToString());
             if (dOrder == debateOrderVar && order != OrderBy.Descending) //If team order is already by name, then we flip them.
             {
-                queryValues.Set("dOrder", ((int)debateOrderVar).ToString());
-                queryValues.Set("Order", ((int)OrderBy.Descending).ToString());
+                ViewState["Order"] = (int)OrderBy.Descending;
             }
             else
             {
-                queryValues.Set("dOrder", ((int)debateOrderVar).ToString());
-                queryValues.Set("Order", ((int)OrderBy.Ascending).ToString());
+                ViewState["Order"] = (int)OrderBy.Ascending;
             }
 
-            string url = Request.Url.AbsolutePath;
-            Response.Redirect(url + "?" + queryValues);
+            dateOrder = int.Parse(DropDownList_Date.SelectedValue);
+            teamOrder = int.Parse(DropDownList_TeamName.SelectedValue);
+            
+            ViewState["dOrder"] = (int)debateOrderVar;
+            ViewState["date"] = dateOrder;
+            ViewState["team"] = teamOrder;
+
+            ForcePostBack();
         }
 
         protected void Calendar1_SelectionChanged(object sender, EventArgs e)
@@ -272,6 +420,31 @@ namespace DebateSchedulerFinal
                 e.Day.IsSelectable = false;
                 e.Cell.BackColor = System.Drawing.Color.GhostWhite;
             }
+        }
+
+        /// <summary>
+        /// This writes a script, embeds it into the client's html and runs it causing a post back to occur (thus refreshing the page's contents).
+        /// </summary>
+        private void ForcePostBack()
+        {
+            StringBuilder sbScript = new StringBuilder();
+            sbScript.Append("<script>\n");
+            sbScript.Append(ClientScript.GetPostBackEventReference(this, "PBArg") + ";\n");
+            sbScript.Append("</script>\n");
+            RegisterStartupScript("AutoPostBackScript", sbScript.ToString());
+        }
+
+        protected void Button_Search_Click(object sender, EventArgs e)
+        {
+            dateOrder = int.Parse(DropDownList_Date.SelectedValue);
+            teamOrder = int.Parse(DropDownList_TeamName.SelectedValue);
+
+            ViewState["Order"] = (int)order;
+            ViewState["dOrder"] = (int)dOrder;
+            ViewState["date"] = dateOrder;
+            ViewState["team"] = teamOrder;
+
+            ForcePostBack();
         }
     }
 }

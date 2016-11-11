@@ -7,8 +7,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace DebateSchedulerFinal
-{
+namespace DebateSchedulerFinal {
     
     
     public partial class DebateCreator {
@@ -104,6 +103,42 @@ namespace DebateSchedulerFinal
         protected global::System.Web.UI.WebControls.Button Button_Remove;
         
         /// <summary>
+        /// Panel_TeamGenerating control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel Panel_TeamGenerating;
+        
+        /// <summary>
+        /// DropDownList_Teams control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DropDownList DropDownList_Teams;
+        
+        /// <summary>
+        /// Label_Teams control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label Label_Teams;
+        
+        /// <summary>
+        /// Button_MakeTeams control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button Button_MakeTeams;
+        
+        /// <summary>
         /// Label_ScheduleError control.
         /// </summary>
         /// <remarks>
@@ -120,5 +155,14 @@ namespace DebateSchedulerFinal
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button Button_CreateSchedule;
+        
+        /// <summary>
+        /// Button_AdminTool control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button Button_AdminTool;
     }
 }
