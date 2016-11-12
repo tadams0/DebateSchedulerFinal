@@ -31,48 +31,51 @@ namespace DebateSchedulerFinal
         {
             ((MasterPage)Master).SetPagePermissionLevel(2);
             User loggedUser = Help.GetUserSession(Session);
-            //Gathering query values
-            NameValueCollection queryValues = HttpUtility.ParseQueryString(Request.QueryString.ToString());
-            string orderString = queryValues.Get("Order");
-            string debateOrderString = queryValues.Get("dOrder");
 
-            if (orderString != null)
+            if (loggedUser != null)
             {
-                order = (OrderBy)(int.Parse(orderString));
-            }
-            if (debateOrderString != null)
-            {
-                dOrder = (DebateOrderVar)(int.Parse(debateOrderString));
-            }
+                //Gathering query values
+                NameValueCollection queryValues = HttpUtility.ParseQueryString(Request.QueryString.ToString());
+                string orderString = queryValues.Get("Order");
+                string debateOrderString = queryValues.Get("dOrder");
 
-            int currentDebateID = Help.GetDebateSeasonID(Application);
-            debates = DatabaseHandler.GetDebateSeasonDebates(currentDebateID);
-
-            debates = Help.OrderDebates(order, dOrder, debates);
-
-            TableRow header = CreateHeaderRow();
-            Table1.Rows.Add(header);
-
-            int rowNum = 1; // row 0 will be the header row.
-            foreach (Debate d in debates)
-            {
-                if (loggedUser.PermissionLevel == 2)
+                if (orderString != null)
                 {
-                    if (d.Team1Score == -1 && d.Team2Score == -1)
+                    order = (OrderBy)(int.Parse(orderString));
+                }
+                if (debateOrderString != null)
+                {
+                    dOrder = (DebateOrderVar)(int.Parse(debateOrderString));
+                }
+
+                int currentDebateID = Help.GetDebateSeasonID(Application);
+                debates = DatabaseHandler.GetDebateSeasonDebates(currentDebateID);
+
+                debates = Help.OrderDebates(order, dOrder, debates);
+
+                TableRow header = CreateHeaderRow();
+                Table1.Rows.Add(header);
+
+                int rowNum = 1; // row 0 will be the header row.
+                foreach (Debate d in debates)
+                {
+                    if (loggedUser.PermissionLevel == 2)
+                    {
+                        if (d.Team1Score == -1 && d.Team2Score == -1)
+                        {
+                            TableRow debateRow = CreateDebateRow(d, rowNum);
+                            Table1.Rows.Add(debateRow);
+                            rowNum++;
+                        }
+                    }
+                    else if (loggedUser.PermissionLevel == 3)
                     {
                         TableRow debateRow = CreateDebateRow(d, rowNum);
                         Table1.Rows.Add(debateRow);
                         rowNum++;
                     }
                 }
-                else if (loggedUser.PermissionLevel == 3)
-                {
-                    TableRow debateRow = CreateDebateRow(d, rowNum);
-                    Table1.Rows.Add(debateRow);
-                    rowNum++;
-                }
             }
-
 
         }
 
@@ -238,7 +241,14 @@ namespace DebateSchedulerFinal
                 DropDownList TeamScore2Control = Table1.Rows[rowNum].Cells[4].FindControl("ddl#" + rowNum) as DropDownList;
                 debate.Team1Score = Int32.Parse(TeamScore1Control.SelectedValue);
                 debate.Team2Score = Int32.Parse(TeamScore2Control.SelectedValue);
-                bool result = DatabaseHandler.UpdateDebate(Session, debate);
+                if (debate.Team1Score >= 0 && debate.Team2Score >= 0)
+                {
+                    bool result = DatabaseHandler.UpdateDebate(Session, debate);
+                }
+                else if (debate.Team1Score >= 0 || debate.Team2Score >= 0) //If this runs then both teams were not assigned a valid score and only one of them was.
+                {
+                    //Display error, you must update both teams not just one...
+                }
             }
             if (loggedUser.PermissionLevel == 2)
                 Response.Redirect(Request.RawUrl);

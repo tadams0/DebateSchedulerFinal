@@ -53,11 +53,11 @@ namespace DebateSchedulerFinal
         private static int permissionToUpdateUsers = 3;
 
         private static int permissionToAddTeams = 3;
-        private static int permissionToUpdateTeams = 3;
+        private static int permissionToUpdateTeams = 2;
         private static int permissionToRemoveTeams = 3;
 
         private static int permissionToAddDebates = 3;
-        private static int permissionToUpdateDebates = 3;
+        private static int permissionToUpdateDebates = 2;
         private static int permissionToRemoveDebates = 3;
         private static int permissionToClearDebates = 4; //Debates cannot be removed.
 
@@ -68,7 +68,7 @@ namespace DebateSchedulerFinal
         private static int permissionToViewLogs = 3;
 
         private static int permissionToAddSeasons = 3;
-        private static int permissionToUpdateSeasons = 3;
+        private static int permissionToUpdateSeasons = 2;
         private static int permissionToRemoveSeasons = 4; //debate seasons cannot be removed.
 
         private static int permissionToAddUserCodes = 3;

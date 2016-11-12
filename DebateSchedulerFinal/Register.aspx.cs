@@ -61,7 +61,7 @@ namespace DebateSchedulerFinal
                 {
                     string ipAddress = Request.UserHostAddress;
 
-                    bool addUserResult = DatabaseHandler.AddUser(ipAddress, new User(0, CreateUserWizard.UserName, CreateUserWizard.Email, CreateUserWizard.Question, 0), CreateUserWizard.Password, CreateUserWizard.Answer);
+                    bool addUserResult = DatabaseHandler.AddUser(ipAddress, new User(2, CreateUserWizard.UserName, CreateUserWizard.Email, CreateUserWizard.Question, 0), CreateUserWizard.Password, CreateUserWizard.Answer);
 
                     if (addUserResult)
                     {
