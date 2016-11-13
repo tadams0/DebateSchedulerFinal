@@ -444,7 +444,7 @@ namespace DebateSchedulerFinal
             User resultingUser = null;
             string realUsername = username.ToUpperInvariant(); //The username is converted to the upper invariant (upper case) to prevent case sensitivity on usernames.
             
-            DataTable table = GetDataTable(GetConnectionString(), "Users", "Name", username, SqlDbType.NChar, 50, false, "exception occured while authenticating username/password.");
+            DataTable table = GetDataTable(GetConnectionString(), "Users", "Name", realUsername, SqlDbType.NChar, 50, false, "exception occured while authenticating username/password.");
 
             if (table.Rows.Count > 0)
             {
@@ -716,7 +716,8 @@ namespace DebateSchedulerFinal
             User updatingUser = Help.GetUserSession(session);
             if (updatingUser != null && updatingUser.PermissionLevel >= permissionToUpdateUsers) //If the user's permission level is high enough
             {
-                if (UserExists(user.Username)) //We ensure that the data exists, otherwise we cannot update something that doesn't exist.
+                User storedUser = GetUser(user.ID);
+                if (storedUser != null) //We ensure that the data exists, otherwise we cannot update something that doesn't exist.
                 {
                     string sqlQuery = "UPDATE Users SET " +
                                 "Name = @Name, Email = @Email, Permissions = @Permissions, SecurityQuestion = @SecurityQuestion" +
@@ -740,6 +741,50 @@ namespace DebateSchedulerFinal
                     {
                         Log(updatingUser.Username,
                             updatingUser.Username + " updated a user with the username " + user.Username);
+
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Updates a user with the given user object.
+        /// </summary>
+        /// <param name="session">The session that is updating the user.</param>
+        /// <param name="user">The user object, whose data will replace the current data in the database.</param>
+        /// <param name="oldPassword">The old password the user is currently using.</param>
+        /// <param name="newPassword">The new password that is being assigned to the user.</param>
+        /// <returns>Returns true if the update worked, false otherwise.</returns>
+        public static bool ChangeUserPassword(HttpSessionState session, User user, string oldPassword, string newPassword, bool log)
+        {
+            User updatingUser = Help.GetUserSession(session);
+            if (updatingUser != null) //If the user really exists
+            {
+                User storedUser = AuthenticateUsernamePassword(user.Username, oldPassword);
+                if (storedUser != null) //We ensure that the data exists, otherwise we cannot update something that doesn't exist.
+                {
+                    string sqlQuery = "UPDATE Users SET " +
+                                "Password = @Password" +
+                                " WHERE Id = " + user.ID;
+                    //ID is omitted because changing it will result in incorrect foreign keys in the debates table.
+
+                    //Generating the parameters, this is done for sanitization reasons.
+                    SqlParameter passwordParameter = new SqlParameter("@Password", SqlDbType.NVarChar, newPassword.Length); //It is important the size is the size of the string and no the max limit.
+                    passwordParameter.Value = newPassword;
+
+                    SqlDataReader result = ExecuteSQL(GetConnectionString(), sqlQuery, "exception occured while updating a user's password.",
+                        passwordParameter);
+
+                    if (result != null)
+                    {
+                        if (log)
+                        {
+                            Log(updatingUser.Username,
+                            updatingUser.Username + " updated their password.");
+                        }
 
                         return true;
                     }
@@ -1258,10 +1303,13 @@ namespace DebateSchedulerFinal
                         //Updating the team's wins/ties/losses
                         if (debate.Team1Score > debate.Team2Score) //team 1 wins
                         {
-                            debate.Team1.TotalScore += debate.Team1Score;
-                            debate.Team2.TotalScore += debate.Team2Score;
-                            debate.Team1.Wins++;
-                            debate.Team2.Losses++;
+                            if (debate.Team1Score >= 0 && debate.Team2Score >= 0) //We only update the wins/losses/ties and total score if both scores given were equal to or above 0.
+                            {
+                                debate.Team1.TotalScore += debate.Team1Score;
+                                debate.Team2.TotalScore += debate.Team2Score;
+                                debate.Team1.Wins++;
+                                debate.Team2.Losses++;
+                            }
                             if (previousDebateData.Team1Score >= 0
                                 && previousDebateData.Team2Score >= 0) //There was a score, now we need to fix the scores.
                             {
@@ -1288,11 +1336,13 @@ namespace DebateSchedulerFinal
                         }
                         else if (debate.Team1Score < debate.Team2Score) //team 2 wins
                         {
-                            debate.Team2.TotalScore += debate.Team2Score;
-                            debate.Team1.TotalScore += debate.Team1Score;
-                            debate.Team2.Wins++;
-                            debate.Team1.Losses++;
-
+                            if (debate.Team1Score >= 0 && debate.Team2Score >= 0)
+                            {
+                                debate.Team2.TotalScore += debate.Team2Score;
+                                debate.Team1.TotalScore += debate.Team1Score;
+                                debate.Team2.Wins++;
+                                debate.Team1.Losses++;
+                            }
                             if (previousDebateData.Team1Score >= 0
                                 && previousDebateData.Team2Score >= 0) //There was a score, now we need to fix the scores.
                             {
@@ -1320,10 +1370,13 @@ namespace DebateSchedulerFinal
                         }
                         else //Tie
                         {
-                            debate.Team2.TotalScore += debate.Team2Score;
-                            debate.Team1.TotalScore += debate.Team1Score;
-                            debate.Team1.Ties++;
-                            debate.Team2.Ties++;
+                            if (debate.Team1Score >= 0 && debate.Team2Score >= 0)
+                            {
+                                debate.Team2.TotalScore += debate.Team2Score;
+                                debate.Team1.TotalScore += debate.Team1Score;
+                                debate.Team1.Ties++;
+                                debate.Team2.Ties++;
+                            }
                             if (previousDebateData.Team1Score >= 0
                                 && previousDebateData.Team2Score >= 0) //There was a score, now we need to fix the scores.
                             {

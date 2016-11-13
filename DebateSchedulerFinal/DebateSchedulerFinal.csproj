@@ -102,6 +102,8 @@
     <Content Include="Register.aspx" />
     <Content Include="RegisterStyle.css" />
     <Content Include="Schedule.aspx" />
+    <Content Include="UserPage.aspx" />
+    <Content Include="UserPageStyle.css" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -196,9 +198,19 @@
     <Compile Include="TeamPair.cs" />
     <Compile Include="User.cs" />
     <Compile Include="UserCodeErrorEnum.cs" />
+    <Compile Include="UserPage.aspx.cs">
+      <DependentUpon>UserPage.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UserPage.aspx.designer.cs">
+      <DependentUpon>UserPage.aspx</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\licenses.licx" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

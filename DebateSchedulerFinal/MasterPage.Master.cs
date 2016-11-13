@@ -10,6 +10,7 @@ namespace DebateSchedulerFinal
     public partial class MasterPage : System.Web.UI.MasterPage
     {
         public int PermissionLevel { get; private set; } = 0;
+        
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -18,7 +19,7 @@ namespace DebateSchedulerFinal
             User user = Help.GetUserSession(Session);
             if (user != null)
                 FillLogout();
-
+            
             if (!Page.IsPostBack)
                 CheckPermissions(user);
             
@@ -72,6 +73,15 @@ namespace DebateSchedulerFinal
             return but;
         }
 
+        private MenuItem MakeUserPageButton()
+        {
+            MenuItem but = new MenuItem();
+            but.NavigateUrl = "~/UserPage.aspx";
+            but.Text = "User Page";
+            but.Value = "U";
+            return but;
+        }
+
         public void RemoveButton(string val)
         {
             MenuItem adminBut = Menu1.FindItem(val);
@@ -83,12 +93,15 @@ namespace DebateSchedulerFinal
 
         private void CheckPermissions(User user)
         {
+            RemoveButton("U");
             RemoveButton("A"); //While this is not effecient, it works.
             RemoveButton("D");
             RemoveButton("R");
 
             if (user != null)
             {
+                Menu1.Items.Add(MakeUserPageButton());
+
                 if (user.PermissionLevel >= 2)
                 {
                     Menu1.Items.Add(MakeRefereeButton());
@@ -103,10 +116,10 @@ namespace DebateSchedulerFinal
 
             //If the user is not logged in and the permission level of the page is greator than 1...
             //Or if the user is logged in but their permission level is less than the page's permission level..
-            if ((user == null && PermissionLevel > 1) || (user != null && user.PermissionLevel < PermissionLevel))
+            if ((user == null && PermissionLevel >= 1) || (user != null && user.PermissionLevel < PermissionLevel))
             {
-                if (Request.Url.AbsolutePath.ToUpperInvariant() != "/Default.aspx".ToUpperInvariant())
-                    Response.Redirect("Default.aspx");
+                if (Request.Url.AbsolutePath.ToUpperInvariant() != ("/" + Help.defaultURL).ToUpperInvariant())
+                    Response.Redirect(Help.defaultURL);
             }
         }
 
@@ -127,6 +140,9 @@ namespace DebateSchedulerFinal
             }
         }
 
+        /// <summary>
+        /// Fills out the logout panel with information pertaining to the logged in user.
+        /// </summary>
         private void FillLogout()
         {
             User user = Help.GetUserSession(Session);
@@ -134,9 +150,17 @@ namespace DebateSchedulerFinal
             {
                 Login1.Visible = false;
                 Panel_logout.Visible = true;
-                Label_Username.Text = user.Username;
+                HyperLink1.Text = user.Username;
                 Label_Permissions.Text = Help.GetPermissionName(user.PermissionLevel);
             }
+        }
+
+        /// <summary>
+        /// Refreshes the log out panel on the master page.
+        /// </summary>
+        public void RefreshLogout()
+        {
+            FillLogout();
         }
 
         protected void Button_Logout_Click(object sender, EventArgs e)

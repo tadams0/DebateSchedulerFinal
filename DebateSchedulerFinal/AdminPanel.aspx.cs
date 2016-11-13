@@ -121,7 +121,7 @@ namespace DebateSchedulerFinal
             {
                 if (user.PermissionLevel <= Help.GetPermissionLevel("Referee"))
                 {
-                    user.PermissionLevel = 0;
+                    user.PermissionLevel = 1;
                     bool result = DatabaseHandler.UpdateUser(Session, user);
                     if (result)
                     {

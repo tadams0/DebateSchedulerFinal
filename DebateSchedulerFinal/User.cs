@@ -13,7 +13,7 @@ namespace DebateSchedulerFinal
         /// <summary>
         /// The username of the user.
         /// </summary>
-        public string Username { get; private set; }
+        public string Username { get; set; }
 
         /// <summary>
         /// The email of the user.

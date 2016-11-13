@@ -22,6 +22,7 @@ namespace DebateSchedulerFinal
         private static readonly string DateFormat = "O";
         public static readonly string scheduleURL = "Schedule.aspx";
         public static readonly string debateCreatorURL = "DebateCreator.aspx";
+        public static readonly string defaultURL = "Default.aspx";
         public static readonly string letters = "abcdefghijklmnopqrstuvwxyz"; //ABCDEFGHIJKLMNOPQRSTUVWXYZ capitalized letters were removed for simpler codes.
         public static readonly string numbers = "1234567890";
         public static readonly string specialCharacters = "!@#$%^&*?/";

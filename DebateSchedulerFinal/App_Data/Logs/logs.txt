@@ -944,3 +944,17 @@ Username: admin Message: "admin updated a debate from { Team 6 versus Team 10, T
 Username: admin Message: "admin updated a team from { Name: Team 3, Wins: 1, Losses: 2, Ties: 2, Total Score: 15 } to { Name: Team 3, Wins: 1, Losses: 3, Ties: 2, Total Score: 15 }" Logged at 11/11/2016 10:31:27 PM server time.
 Username: admin Message: "admin updated a team from { Name: Team 4, Wins: 1, Losses: 1, Ties: 0, Total Score: 7 } to { Name: Team 4, Wins: 2, Losses: 1, Ties: 0, Total Score: 11 }" Logged at 11/11/2016 10:31:27 PM server time.
 Username: admin Message: "admin updated a debate from { Team 3 versus Team 4, Team 1 Score: -1, Team 2 Score: -1, On Date: 12/10/2016 12:00:00 AM and takes place in the morning } to { Team 3 versus Team 4, Team 1 Score: 0, Team 2 Score: 4, On Date: 12/10/2016 12:00:00 AM and takes place in the morning }" Logged at 11/11/2016 10:31:27 PM server time.
+Username: admin2 Message: "admin2 updated a user with the username admin2" Logged at 11/13/2016 4:50:48 PM server time.
+Username: Super Referee Message: "Super Referee updated a user with the username Super Referee" Logged at 11/13/2016 4:51:28 PM server time.
+Username: admin Message: "admin updated a user with the username admin" Logged at 11/13/2016 4:51:48 PM server time.
+Username: admin2 Message: "admin2 updated a user with the username admin2" Logged at 11/13/2016 4:59:31 PM server time.
+Username: admin2 Message: "admin2 updated a user with the username admin2" Logged at 11/13/2016 4:59:35 PM server time.
+Username: aDmIn Message: "aDmIn updated a user with the username aDmIn" Logged at 11/13/2016 4:59:43 PM server time.
+Username: admIN Message: "admIN updated a user with the username admIN" Logged at 11/13/2016 5:00:01 PM server time.
+Username: admin Message: "admin updated a user with the username admin" Logged at 11/13/2016 5:37:47 PM server time.
+Username: admin Message: "admin updated a user with the username admin" Logged at 11/13/2016 5:38:07 PM server time.
+Username: admin Message: "admin added a new user code with the value: 5vg8m3v7bk." Logged at 11/13/2016 5:39:32 PM server time.
+Username: ::1 Message: "::1 (IP) added a new user named test." Logged at 11/13/2016 5:39:56 PM server time.
+Username: test Message: "test has redeemed the user code 5vg8m3v7bk" Logged at 11/13/2016 5:39:56 PM server time.
+Username: test Message: "test updated a user with the username test" Logged at 11/13/2016 5:40:47 PM server time.
+Username: test Message: "test updated a user with the username test" Logged at 11/13/2016 5:40:58 PM server time.
