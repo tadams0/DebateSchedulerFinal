@@ -380,7 +380,7 @@ namespace DebateSchedulerFinal
             } while (StartDate <= EndDate);
             return (dateList);
         }
-        
+
         /// <summary>
         /// Gets the first available date found in the list of date pairs.
         /// </summary>
@@ -391,16 +391,52 @@ namespace DebateSchedulerFinal
         /// <returns>Returns true if there was an available date, false otherwise.</returns>
         public static bool GetAvailableDate(List<Debate>[] datePairs, Debate d, out int listIndex, out bool morning)
         {
+            return GetAvailableDate(datePairs, d, 0, datePairs.Length, out listIndex, out morning);
+        }
+
+        /// <summary>
+        /// Gets the first available date found in the list of datepairs starting at a certain index.
+        /// </summary>
+        /// <param name="datePairs">An array of lists where each list represents a new date.</param>
+        /// <param name="d">The debate trying to be added to the date pairs.</param>
+        /// <param name="startIndex">The index at which the loop begins, it will end at this index as well once it loops around.</param>
+        /// <param name="listIndex">The index at which the debate can be added.</param>
+        /// <param name="morning">Whether or not the debate added needs to be morning or afternoon.</param>
+        /// <returns>Returns true if there was an available date, false otherwise.</returns>
+        public static bool GetAvailableDate(List<Debate>[] datePairs, Debate d, int startIndex, out int listIndex, out bool morning)
+        {
+            bool result = GetAvailableDate(datePairs, d, startIndex, datePairs.Length, out listIndex, out morning);
+            if (result)
+                return result;
+            else
+            {
+                return GetAvailableDate(datePairs, d, 0, startIndex, out listIndex, out morning); 
+            }
+        }
+
+        /// <summary>
+        /// Gets the first available date found in the list of date pairs.
+        /// </summary>
+        /// <param name="datePairs">An array of lists where each list represents a new date.</param>
+        /// <param name="d">The debate trying to be added to the date pairs.</param>
+        /// <param name="startIndex">The index at which the loop begins.</param>
+        /// <param name="endIndex">The end at which the loop stops.</param>
+        /// <param name="listIndex">The index at which the debate can be added.</param>
+        /// <param name="morning">Whether or not the debate added needs to be morning or afternoon.</param>
+        /// <returns>Returns true if there was an available date, false otherwise.</returns>
+        public static bool GetAvailableDate(List<Debate>[] datePairs, Debate d, int startIndex, int endIndex, out int listIndex, out bool morning)
+        {
             int maxDebatesPerDay = MaxMorningsPerDay + MaxAfternoonsPerDay;
             listIndex = -1;
             morning = true;
-            int currentIndex = -1; //Though we may consider not using a foreach and a for instead so we keep track of the index.. I am keeping it for readability.
-            foreach (List<Debate> debateDay in datePairs)
+
+            for (int k = startIndex; k < endIndex; k ++) // each (List<Debate> debateDay in datePairs)
             {
-                currentIndex++;
+                List<Debate> debateDay = datePairs[k]; //The current day being looked at.
+                
                 if (debateDay.Count == 0) //If there is no debate on this day then we go ahead and use this day.
                 {
-                    listIndex = currentIndex;
+                    listIndex = k;
                     return true;
                 }
                 else if (debateDay.Count < maxDebatesPerDay) //If there is an available day...
@@ -440,7 +476,7 @@ namespace DebateSchedulerFinal
                         {
                             morning = true; //We assign the morning.
                         }
-                        listIndex = currentIndex;
+                        listIndex = k;
                         return true;
                     }
 
@@ -477,17 +513,21 @@ namespace DebateSchedulerFinal
                 datePairs[i] = new List<Debate>(); //We initialize a new list for each debate day.
             }
 
+            int startIndex = 0;
             //We now find places for the debates.
             foreach (Debate d in teamPairs)
             {
                 bool morning;
                 int index;
-                bool result = GetAvailableDate(datePairs, d, out index, out morning); //This returns an available slot the debate can be placed at.
+                bool result = GetAvailableDate(datePairs, d, startIndex, out index, out morning); //This returns an available slot the debate can be placed at.
                 if (result) //There was an available slot.
                 {
                     d.MorningDebate = morning; //We set whether it's a morning or afternoon slot.
                     d.Date = Saturdays[index]; //We set the date.
                     datePairs[index].Add(d); //We then add the debate to the list so future debates being added are influenced.
+                    startIndex++;
+                    if (startIndex >= datePairs.Length)
+                        startIndex = 0;
                 }
                 else //There was not an available slot.
                 {
