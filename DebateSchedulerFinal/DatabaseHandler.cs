@@ -529,6 +529,25 @@ namespace DebateSchedulerFinal
         }
 
         /// <summary>
+        /// Checks whether a user id already exists in the database.
+        /// </summary>
+        /// <param name="id">The user id to check.</param>
+        /// <returns>Returns true if the user exists, false otherwise.</returns>
+        public static bool UserExists(int id)
+        {
+            DataTable table = GetDataTable(GetConnectionString(), "Users", "Id", id.ToString(), SqlDbType.Int, int.MaxValue, false, "exception occured while checking if a user exists by id.");
+
+            if (table.Rows.Count > 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Gets and returns the security question of the given username.
         /// </summary>
         /// <param name="username">The username of the user.</param>
@@ -913,6 +932,36 @@ namespace DebateSchedulerFinal
         }
 
         /// <summary>
+        /// Removes a user by their id. Permissions can be circumvented by using the same id as the session.
+        /// </summary>
+        /// <param name="session">The session deleting the user.</param>
+        /// <param name="id">The user id of the user to remove.</param>
+        /// <returns>Returns true if the user was successfully removed, returns false otherwise.</returns>
+        public static bool RemoveUser(HttpSessionState session, int id)
+        {
+            User currentSessionUser = Help.GetUserSession(session); //Get the current user who is running this code.
+            if (currentSessionUser != null 
+                && (currentSessionUser.PermissionLevel >= permissionToRemoveUsers || currentSessionUser.ID == id)) //If the user exists and their permission level is super referee or greater...
+            {
+                if (UserExists(id)) //If the username does exist.
+                {
+                    string sqlQuery = "DELETE FROM Users WHERE Id = @Value";
+                    SqlParameter parameter = new SqlParameter("@Value", SqlDbType.Int);
+                    parameter.Value = id;
+
+                    SqlDataReader result = ExecuteSQL(GetConnectionString(), sqlQuery, "exception occured while removing a user by id.", parameter);
+                    if (result != null) //If the result is not null, then the query succeeded and should be logged.
+                    {
+                        Log(currentSessionUser, currentSessionUser.Username + " removed a user with the id of " + id);
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Gets a list of all the teams in the database.
         /// </summary>
         /// <returns>Returns a list populated with all the teams in the database. Returns an empty list if there are no teams in the database.</returns>
@@ -1109,7 +1158,7 @@ namespace DebateSchedulerFinal
         /// <param name="session">The current session, used to determine the user performing this action.</param>
         /// <param name="id">The id of the team to remove.</param>
         /// <returns>Returns true if the team was properly removed, false if it was not.</returns>
-        public static bool RemoveTeam(HttpSessionState session, int id)
+        public static bool RemoveTeam(HttpSessionState session, int id, bool log)
         {
             User currentSessionUser = Help.GetUserSession(session); //Get the current user who is running this code.
             if (currentSessionUser != null && currentSessionUser.PermissionLevel >= permissionToRemoveTeams) //If the user exists and their permission level is super referee or greater...
@@ -1125,7 +1174,10 @@ namespace DebateSchedulerFinal
 
                     if (result != null) //If the result is not null, then the query succeeded and should be logged.
                     {
-                        Log(currentSessionUser, currentSessionUser.Username + " removed a team with the data of " + team.ToString());
+                        if (log)
+                        {
+                            Log(currentSessionUser, currentSessionUser.Username + " removed a team with the data of " + team.ToString());
+                        }
                         return true;
                     }
                 }
@@ -1226,6 +1278,27 @@ namespace DebateSchedulerFinal
             }
 
             return resultingDebate;
+        }
+
+        /// <summary>
+        /// Gets a debate's scores for each team from the database based on its ID.
+        /// </summary>
+        /// <param name="id">The ID of the debate.</param>
+        /// <returns>Returns true if a debate was found with the given id and scores were retrieved, returns false otherwise.</returns>
+        public static bool GetDebateScores(int id, out int team1Score, out int team2Score)
+        {
+            team1Score = -1;
+            team2Score = -1;
+            DataTable table = GetDataTable(GetConnectionString(), "Debates", "Id", id.ToString(), SqlDbType.Int, int.MaxValue, true, "exception occured while gathering a single debate by ID.");
+
+            if (table.Rows.Count > 0)
+            {
+                team1Score = (int)table.Rows[0]["T1Score"];
+                team2Score = (int)table.Rows[0]["T2Score"];
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -1912,6 +1985,63 @@ namespace DebateSchedulerFinal
         }
 
         /// <summary>
+        /// Scans through the list of debates in a season and checks their scores.
+        /// </summary>
+        /// <param name="id">The id of the debate season to check.</param>
+        /// <returns>Returns true if the given debate season has a score set in at least 1 debate. Returns false is an error occured or there was no score set.</returns>
+        public static bool DebateSeasonHasAScore(int id)
+        {
+            DataTable table = GetDataTable(GetConnectionString(), "Seasons", "Id", id.ToString(), SqlDbType.Int, int.MaxValue, true, "exception occured while gathering a debate season.");
+
+            if (table.Rows.Count > 0)
+            {
+                string debateString = table.Rows[0]["Debates"] as string;
+                List<int> debateIDs = DebateSeason.ParseDebateString(debateString);
+                
+                foreach (int i in debateIDs)
+                {
+                    int team1Score;
+                    int team2Score;
+                    if (GetDebateScores(i, out team1Score, out team2Score))
+                    {
+                        if (team1Score >= 0 && team2Score >= 0)
+                            return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Scans through the debates in a given season to determine if all debates have been scored.
+        /// </summary>
+        /// <param name="id">The id of the debate season to check.</param>
+        /// <returns>Returns true if all debates in the given debate season were scored. Returns false otherwise.</returns>
+        public static bool DebateSeasonScored(int id)
+        {
+            DataTable table = GetDataTable(GetConnectionString(), "Seasons", "Id", id.ToString(), SqlDbType.Int, int.MaxValue, true, "exception occured while gathering a debate season.");
+
+            if (table.Rows.Count > 0)
+            {
+                string debateString = table.Rows[0]["Debates"] as string;
+                List<int> debateIDs = DebateSeason.ParseDebateString(debateString);
+
+                foreach (int i in debateIDs)
+                {
+                    int team1Score;
+                    int team2Score;
+                    GetDebateScores(i, out team1Score, out team2Score);
+                    if (team1Score < 0 || team2Score < 0)
+                        return false; //An unscored debate was found, we now return false indicating the debate season isn't fully scored.
+                }
+                return true; //If it's passed the foreach loop then nothing was unscored otherwise it would have returned false by now.
+            }
+
+            return false; //An error occured if we made it here.
+        }
+
+        /// <summary>
         /// Adds a debate season to the database.
         /// </summary>
         /// <param name="session">The session that is adding the debate season.</param>
@@ -2020,7 +2150,7 @@ namespace DebateSchedulerFinal
             User updatingUser = Help.GetUserSession(session);
             if (updatingUser != null && updatingUser.PermissionLevel >= permissionToUpdateSeasons) //If the user's permission level is high enough
             {
-                DebateSeason currentSeason = GetDebateSeason(season.ID);
+                DebateSeason currentSeason = GetDebateSeason(season.ID); //This will make updating debate seasons very slow. Though this is currently no problem, it may be ideal later to remove this.
                 if (currentSeason != null) //We ensure that the data exists, otherwise we cannot update something that doesn't exist.
                 {
                     string sqlQuery = "UPDATE Seasons SET " +
@@ -2052,6 +2182,38 @@ namespace DebateSchedulerFinal
 
                         return true;
                     }
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Ends a debate season with the given id.
+        /// </summary>
+        /// <param name="session">The session that is endingf the debate season.</param>
+        /// <param name="seasonID">The id of the debate season.</param>
+        /// <returns>Returns true if the season was ended successfully, false otherwise.</returns>
+        public static bool EndDebateSeason(HttpSessionState session, int seasonID)
+        {
+            User updatingUser = Help.GetUserSession(session);
+            if (updatingUser != null && updatingUser.PermissionLevel >= permissionToUpdateSeasons) //If the user's permission level is high enough
+            {
+                string sqlQuery = "UPDATE Seasons SET " +
+                                "HasEnded = @Ended" +
+                                " WHERE Id = " + seasonID;
+                
+                SqlParameter ended = new SqlParameter("@Ended", SqlDbType.Bit);
+                ended.Value = 1;
+
+                SqlDataReader result = ExecuteSQL(GetConnectionString(), sqlQuery, "exception occured while ending a debate season.",
+                    ended);
+
+                if (result != null)
+                {
+                    Log(updatingUser.Username, updatingUser.Username + " has ended the debate season!");
+
+                    return true;
                 }
             }
 

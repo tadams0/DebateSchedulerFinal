@@ -20,6 +20,7 @@ namespace DebateSchedulerFinal
                 if (loggedUser.PermissionLevel >= Help.GetPermissionLevel("Super Referee"))
                 {
                     Panel_ChangeUsername.Visible = true;
+                    Panel_DeleteAccount.Visible = false;
                 }
             }
             else
@@ -115,5 +116,53 @@ namespace DebateSchedulerFinal
 
             }
         }
+
+        protected void Button_DeleteAccount_Click(object sender, EventArgs e)
+        {
+            User loggedUser = Help.GetUserSession(Session);
+            if (loggedUser != null)
+            {
+                User resultUser = DatabaseHandler.AuthenticateUsernamePassword(loggedUser.Username, TextBox_DeleteAccount.Text);
+                if (resultUser != null) //The resulting user was not deleted.
+                {
+                    Panel_Confirm.Visible = true;
+                    Label_DeleteAccountError.Visible = true;
+                    Label_DeleteAccountError.Text = "Are you sure you want to permanently removed your account?";
+                }
+                else
+                {
+                    Label_DeleteAccountError.Visible = true;
+                    Label_DeleteAccountError.Text = "Password is invalid or does not match.";
+                }
+            }
+        }
+
+        protected void Button_NoDelete_Click(object sender, EventArgs e)
+        {
+            Panel_Confirm.Visible = false;
+            Label_DeleteAccountError.Visible = false;
+        }
+
+        protected void Button_YesDelete_Click(object sender, EventArgs e)
+        {
+            User loggedUser = Help.GetUserSession(Session);
+            if (loggedUser != null)
+            {
+                bool result = DatabaseHandler.RemoveUser(Session, loggedUser.ID);
+                if (result)
+                {
+                    Help.EndSession(Session);
+                    ((MasterPage)Master).RefreshLogout();
+                    Response.Redirect(Help.defaultURL);
+                }
+                else
+                {
+                    Label_DeleteAccountError.Visible = true;
+                    Label_DeleteAccountError.Text = "An error occured while removing account.";
+                }
+            }
+        }
+
+
     }
 }

@@ -13,8 +13,8 @@ namespace DebateSchedulerFinal
     /// </summary>
     public static class Help
     {
-        private static readonly int MaxMorningsPerDay = 3;
-        private static readonly int MaxAfternoonsPerDay = 2;
+        public static readonly int MaxMorningsPerDay = 3;
+        public static readonly int MaxAfternoonsPerDay = 2;
         private static readonly int MaximumTeams = 10;
         private static readonly int MaxTeamNameLength = 50;
         private static readonly int MinTeamNameLength = 3;
@@ -532,6 +532,7 @@ namespace DebateSchedulerFinal
                 else //There was not an available slot.
                 {
                     //This is a problem... this is an impossible match up, too many teams or too few weeks.
+                    return null; //To indicate that a matchup is impossible we return null.
                 }
             }
 

@@ -1,11 +1,6 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/MasterPage.Master" AutoEventWireup="true" CodeBehind="UserPage.aspx.cs" Inherits="DebateSchedulerFinal.UserPage" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
-    <style type="text/css">
-        .auto-style2 {
-            width: 216px;
-        }
-    </style>
-</asp:Content>
+    </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="mainContent" runat="server">
     <link rel ="stylesheet" href ="UserPageStyle.css" type ="text/css" /> <!--This is the stylesheet for the user page.-->
     &nbsp;&nbsp;&nbsp;<asp:Panel ID="Panel_Title" runat="server" HorizontalAlign="Center">
@@ -88,6 +83,27 @@
         <asp:Button ID="Button_ChangeUsername" runat="server" OnClick="Button_ChangeUsername_Click" Text="Change Username" />
         <br />
         <asp:Label ID="Label_UsernameError" runat="server" ForeColor="Red" Text="Error" Visible="False"></asp:Label>
+    </asp:Panel>
+        </div>
+    &nbsp;&nbsp;&nbsp;
+    <div id ="deleteUserPanel">
+    <asp:Panel ID="Panel_DeleteAccount" runat="server" BackColor="#CCCCCC" BorderStyle="Solid" DefaultButton="Button_DeleteAccount" HorizontalAlign="Center">
+        <asp:Label ID="Label3" runat="server" Font-Size="Medium" Text="Delete Account"></asp:Label>
+        <br />
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <asp:Label ID="Label5" runat="server" Text="Password:"></asp:Label>
+        <asp:TextBox ID="TextBox_DeleteAccount" runat="server" TextMode="Password"></asp:TextBox>
+        <br />
+        <asp:Button ID="Button_DeleteAccount" runat="server" OnClick="Button_DeleteAccount_Click" Text="Delete Account" />
+        <br />
+        <asp:Label ID="Label_DeleteAccountError" runat="server" ForeColor="Red" Text="Error" Visible="False"></asp:Label>
+        <br />
+        <asp:Panel ID="Panel_Confirm" runat="server" HorizontalAlign="Center" Visible="False">
+            <asp:Button ID="Button_YesDelete" runat="server" OnClick="Button_YesDelete_Click" Text="Yes Delete My Account!" />
+            <br />
+            <br />
+            <asp:Button ID="Button_NoDelete" runat="server" OnClick="Button_NoDelete_Click" Text="No Don't Delete My Account" />
+        </asp:Panel>
     </asp:Panel>
         </div>
 <br />

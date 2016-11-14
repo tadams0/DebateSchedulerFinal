@@ -27,6 +27,8 @@ namespace DebateSchedulerFinal
 
         private List<Debate> debates = new List<Debate>();
 
+        private int debateSeasonID;
+
         protected void Page_Load(object sender, EventArgs e)
         {
             ((MasterPage)Master).SetPagePermissionLevel(2);
@@ -48,8 +50,17 @@ namespace DebateSchedulerFinal
                     dOrder = (DebateOrderVar)(int.Parse(debateOrderString));
                 }
 
-                int currentDebateID = Help.GetDebateSeasonID(Application);
-                debates = DatabaseHandler.GetDebateSeasonDebates(currentDebateID);
+                debateSeasonID = Help.GetDebateSeasonID(Application);
+
+                if (debateSeasonID == -1) //There is no debate season going on.
+                {
+                    Panel_Info.Visible = true;
+                    Label_Info.Text = "There is currently no ongoing debate season to score.";
+                    Panel1.Visible = false;
+                    Panel_UpdateScores.Visible = false;
+                    return; //We end the method here if there is no debate season/
+                }
+                debates = DatabaseHandler.GetDebateSeasonDebates(debateSeasonID);
 
                 debates = Help.OrderDebates(order, dOrder, debates);
 
@@ -75,8 +86,38 @@ namespace DebateSchedulerFinal
                         rowNum++;
                     }
                 }
+
+                if (Table1.Rows.Count == 1 && loggedUser.PermissionLevel < 3) //Only the header exists in the table. IE: There are no more debates to score.
+                {
+                    Panel_Info.Visible = true;
+                    Label_Info.Text = "All debates have been scored, the season must now be ended by a " + Help.GetPermissionName(3);
+                    Panel1.Visible = false;
+                    Panel_UpdateScores.Visible = false;
+                }
+
+                //Creating the end debate season button.
+                if (loggedUser.PermissionLevel >= 3 && DatabaseHandler.DebateSeasonScored(debateSeasonID))
+                {
+                    //The entire debate season has been scored, so let's add the option to end it.
+                    Button endSeasonBut = new Button();
+                    endSeasonBut.Width = UpdateButton.Width;
+                    endSeasonBut.Height = 20;
+                    endSeasonBut.Text = "End Debate Season";
+                    endSeasonBut.Command += EndSeasonBut_Command;
+                    Panel_UpdateScores.Controls.AddAt(Panel_UpdateScores.Controls.Count - 1, new LiteralControl("<br /> <br /> <br />"));
+                    Panel_UpdateScores.Controls.AddAt(Panel_UpdateScores.Controls.Count - 1, endSeasonBut);
+                    Panel_UpdateScores.Controls.AddAt(Panel_UpdateScores.Controls.Count - 1, new LiteralControl("<br />"));
+                }
             }
 
+        }
+
+        private void EndSeasonBut_Command(object sender, CommandEventArgs e)
+        {
+            //The end debate season button has been pressed, now we end the debate season.
+            DatabaseHandler.EndDebateSeason(Session, debateSeasonID);
+            Help.SetDebateID(Application, -1);
+            Response.Redirect(Request.RawUrl);
         }
 
         private TableRow CreateHeaderRow()
