@@ -21,34 +21,39 @@
         </asp:Panel>
     </div>
     <br />
-     <div id ="RefereeCreator">
-    <asp:Panel ID="Panel_CreateReferee" runat="server" BackColor="#CCCCCC" DefaultButton="Button_RefereeMaker" BorderStyle="Solid" HorizontalAlign="Center">
-        <asp:Label ID="Label_CreateReferee" runat="server" Text="Create Referee"></asp:Label>
+     
+    <br />
+    <div id ="RefereeCreator">
+         <asp:Panel ID="Panel_Codes" runat="server" BackColor="#CCCCCC" BorderStyle="Solid" HorizontalAlign="Center">
+             <asp:Label ID="Label_RefereeCode" runat="server" Text="Referee Codes"></asp:Label>
+             <br />
+             <asp:Label ID="Label_CodeResult" runat="server" Text="Code Result" Visible="False"></asp:Label>
+             <br />
+             <asp:Button ID="Button_GenerateCode" runat="server" OnClick="Button_GenerateCode_Click" Text="Generate New Code" />
+             <br />
+             <asp:Label ID="Label1" runat="server" Text="Active Codes"></asp:Label>
+             <asp:Panel ID="Panel_ActiveCodes" runat="server" HorizontalAlign="Center">
+             </asp:Panel>
+         </asp:Panel>
+         <br />
         <br />
-        <asp:TextBox ID="TextBox_RefereeMaker" runat="server"></asp:TextBox>
-        <br />
-        <asp:Label ID="Label_RefereeMakerInfo" runat="server" ForeColor="Red" Text="User does not exist." Visible="False"></asp:Label>
-        <br />
-        <asp:Button ID="Button_RefereeMaker" runat="server" Text="Add Referee" OnClick="Button_RefereeMaker_Click" />
-        <asp:Button ID="Button_RevokeReferee" runat="server" OnClick="Button_RevokeReferee_Click" Text="Revoke Referee" />
+    
+    <asp:Panel ID="Panel_CreateReferee" runat="server" BackColor="#CCCCCC" BorderStyle="Solid" HorizontalAlign="Center">
+        <asp:Label ID="Label_CreateReferee" runat="server" Text="Add or Revoke Referee Status"></asp:Label>
         <br />
         <br />
-        <asp:Label ID="Label_RefereeCode" runat="server" Text="Referee Code"></asp:Label>
-        <br />
-        <asp:Label ID="Label_CodeResult" runat="server" Text="Code Result" Visible="False"></asp:Label>
-        <br />
-        <asp:Button ID="Button_GenerateCode" runat="server" OnClick="Button_GenerateCode_Click" Text="Generate New Code" />
-        <br />
-        <br />
-        <asp:Label ID="Label1" runat="server" Text="Active Codes"></asp:Label>
-        <asp:Panel ID="Panel_ActiveCodes" runat="server" HorizontalAlign="Center">
-        </asp:Panel>
     </asp:Panel>
-        <br />
+         
+         <br />
+         
         </div>
     <div id ="LogViewer">
         <asp:Panel ID="Panel_ViewLog" runat="server" BackColor="#CCCCCC" BorderStyle="Solid">
-            <asp:Label ID="Label_LogTitle" runat="server" Text="Log"></asp:Label>
+            <asp:Panel ID="Panel_ViewLogTitle" runat="server" HorizontalAlign="Center">
+                <asp:Label ID="Label_LogTitle" runat="server" Text="Log"></asp:Label>
+                <br />
+                <asp:Button ID="Button_ViewLog" runat="server" OnClick="Button_ViewLog_Click" Text="View Log" />
+            </asp:Panel>
             <br />
         </asp:Panel>
     </div>

@@ -29,7 +29,7 @@
                                         </td>
                                         <td>
                                             <asp:TextBox ID="CurrentPassword" runat="server" TextMode="Password"></asp:TextBox>
-                                            <asp:RequiredFieldValidator ID="CurrentPasswordRequired" runat="server" ControlToValidate="CurrentPassword" ErrorMessage="Password is required." ToolTip="Password is required." ValidationGroup="ChangePassword">*</asp:RequiredFieldValidator>
+                                            <asp:RequiredFieldValidator ID="CurrentPasswordRequired" runat="server" ControlToValidate="CurrentPassword" ErrorMessage="Password is required." ToolTip="Password is required." ValidationGroup="ChangePassword" ForeColor="Red">*</asp:RequiredFieldValidator>
                                         </td>
                                     </tr>
                                     <tr>
@@ -38,7 +38,7 @@
                                         </td>
                                         <td>
                                             <asp:TextBox ID="NewPassword" runat="server" TextMode="Password"></asp:TextBox>
-                                            <asp:RequiredFieldValidator ID="NewPasswordRequired" runat="server" ControlToValidate="NewPassword" ErrorMessage="New Password is required." ToolTip="New Password is required." ValidationGroup="ChangePassword">*</asp:RequiredFieldValidator>
+                                            <asp:RequiredFieldValidator ID="NewPasswordRequired" runat="server" ControlToValidate="NewPassword" ErrorMessage="New Password is required." ToolTip="New Password is required." ValidationGroup="ChangePassword" ForeColor="Red">*</asp:RequiredFieldValidator>
                                         </td>
                                     </tr>
                                     <tr>
@@ -47,7 +47,7 @@
                                         </td>
                                         <td>
                                             <asp:TextBox ID="ConfirmNewPassword" runat="server" TextMode="Password"></asp:TextBox>
-                                            <asp:RequiredFieldValidator ID="ConfirmNewPasswordRequired" runat="server" ControlToValidate="ConfirmNewPassword" ErrorMessage="Confirm New Password is required." ToolTip="Confirm New Password is required." ValidationGroup="ChangePassword">*</asp:RequiredFieldValidator>
+                                            <asp:RequiredFieldValidator ID="ConfirmNewPasswordRequired" runat="server" ControlToValidate="ConfirmNewPassword" ErrorMessage="Confirm New Password is required." ToolTip="Confirm New Password is required." ValidationGroup="ChangePassword" ForeColor="Red">*</asp:RequiredFieldValidator>
                                         </td>
                                     </tr>
                                     <tr>

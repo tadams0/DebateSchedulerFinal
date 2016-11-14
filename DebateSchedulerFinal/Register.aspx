@@ -25,7 +25,7 @@
                                 </td>
                                 <td>
                                     <asp:TextBox ID="UserName" runat="server"></asp:TextBox>
-                                    <asp:RequiredFieldValidator ID="UserNameRequired" runat="server" ControlToValidate="UserName" ErrorMessage="User Name is required." ToolTip="User Name is required." ValidationGroup="CreateUserWizard">*</asp:RequiredFieldValidator>
+                                    <asp:RequiredFieldValidator ID="UserNameRequired" runat="server" ControlToValidate="UserName" ErrorMessage="User Name is required." ToolTip="User Name is required." ValidationGroup="CreateUserWizard" ForeColor="Red">*</asp:RequiredFieldValidator>
                                 </td>
                             </tr>
                             <tr>
@@ -34,7 +34,7 @@
                                 </td>
                                 <td>
                                     <asp:TextBox ID="Password" runat="server" TextMode="Password"></asp:TextBox>
-                                    <asp:RequiredFieldValidator ID="PasswordRequired" runat="server" ControlToValidate="Password" ErrorMessage="Password is required." ToolTip="Password is required." ValidationGroup="CreateUserWizard">*</asp:RequiredFieldValidator>
+                                    <asp:RequiredFieldValidator ID="PasswordRequired" runat="server" ControlToValidate="Password" ErrorMessage="Password is required." ToolTip="Password is required." ValidationGroup="CreateUserWizard" ForeColor="Red">*</asp:RequiredFieldValidator>
                                 </td>
                             </tr>
                             <tr>
@@ -43,7 +43,7 @@
                                 </td>
                                 <td>
                                     <asp:TextBox ID="ConfirmPassword" runat="server" TextMode="Password"></asp:TextBox>
-                                    <asp:RequiredFieldValidator ID="ConfirmPasswordRequired" runat="server" ControlToValidate="ConfirmPassword" ErrorMessage="Confirm Password is required." ToolTip="Confirm Password is required." ValidationGroup="CreateUserWizard">*</asp:RequiredFieldValidator>
+                                    <asp:RequiredFieldValidator ID="ConfirmPasswordRequired" runat="server" ControlToValidate="ConfirmPassword" ErrorMessage="Confirm Password is required." ToolTip="Confirm Password is required." ValidationGroup="CreateUserWizard" ForeColor="Red">*</asp:RequiredFieldValidator>
                                 </td>
                             </tr>
                             <tr>
@@ -52,7 +52,7 @@
                                 </td>
                                 <td>
                                     <asp:TextBox ID="Email" runat="server"></asp:TextBox>
-                                    <asp:RequiredFieldValidator ID="EmailRequired" runat="server" ControlToValidate="Email" ErrorMessage="E-mail is required." ToolTip="E-mail is required." ValidationGroup="CreateUserWizard">*</asp:RequiredFieldValidator>
+                                    <asp:RequiredFieldValidator ID="EmailRequired" runat="server" ControlToValidate="Email" ErrorMessage="E-mail is required." ToolTip="E-mail is required." ValidationGroup="CreateUserWizard" ForeColor="Red">*</asp:RequiredFieldValidator>
                                 </td>
                             </tr>
                             <tr>
@@ -61,7 +61,7 @@
                                 </td>
                                 <td>
                                     <asp:TextBox ID="Question" runat="server"></asp:TextBox>
-                                    <asp:RequiredFieldValidator ID="QuestionRequired" runat="server" ControlToValidate="Question" ErrorMessage="Security question is required." ToolTip="Security question is required." ValidationGroup="CreateUserWizard">*</asp:RequiredFieldValidator>
+                                    <asp:RequiredFieldValidator ID="QuestionRequired" runat="server" ControlToValidate="Question" ErrorMessage="Security question is required." ToolTip="Security question is required." ValidationGroup="CreateUserWizard" ForeColor="Red">*</asp:RequiredFieldValidator>
                                 </td>
                             </tr>
                             <tr>
@@ -70,7 +70,7 @@
                                 </td>
                                 <td>
                                     <asp:TextBox ID="Answer" runat="server"></asp:TextBox>
-                                    <asp:RequiredFieldValidator ID="AnswerRequired" runat="server" ControlToValidate="Answer" ErrorMessage="Security answer is required." ToolTip="Security answer is required." ValidationGroup="CreateUserWizard">*</asp:RequiredFieldValidator>
+                                    <asp:RequiredFieldValidator ID="AnswerRequired" runat="server" ControlToValidate="Answer" ErrorMessage="Security answer is required." ToolTip="Security answer is required." ValidationGroup="CreateUserWizard" ForeColor="Red">*</asp:RequiredFieldValidator>
                                 </td>
                             </tr>
                             <tr>

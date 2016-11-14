@@ -6,6 +6,7 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using System.Drawing;
 using System.Web.UI.HtmlControls;
+using System.Threading;
 
 namespace DebateSchedulerFinal
 {
@@ -14,27 +15,18 @@ namespace DebateSchedulerFinal
         private NewsPost editingPost = null;
         private Color codeColor = Color.ForestGreen;
 
+        private Color refereeColor = Color.DarkRed;
+        private Color nonRefereeColor = Color.Black;
+
+        private const int usersPerPage = 5000;
+        private int currentUserPage = 0;
+
         protected void Page_Load(object sender, EventArgs e)
         {
             ((MasterPage)Master).SetPagePermissionLevel(3);
             User loggedUser = Help.GetUserSession(Session);
             if (loggedUser != null && loggedUser.PermissionLevel >= 3)
             {
-                string[] logLines = DatabaseHandler.GetLog(Session);
-
-                Label_LogTitle.Text = "Logs as of " + DateTime.Now;
-
-                if (logLines != null)
-                {
-                    foreach (string s in logLines)
-                    {
-                        Label l = new Label();
-                        l.Text = s;
-                        Panel_ViewLog.Controls.AddAt(2, l);
-                        Panel_ViewLog.Controls.AddAt(2, new LiteralControl("<br /> <br />"));
-                    }
-                }
-
                 List<string> activeCodes = DatabaseHandler.GetActiveCodes(Session);
 
                 foreach (string s in activeCodes)
@@ -45,6 +37,47 @@ namespace DebateSchedulerFinal
                     Panel_ActiveCodes.Controls.Add(codeLabel);
                     Panel_ActiveCodes.Controls.Add(new LiteralControl("<br />"));
                 }
+
+                List<User> users = DatabaseHandler.GetUsers(currentUserPage, currentUserPage + usersPerPage + 1);
+                int count = users.Count;
+                if (users.Count > usersPerPage)
+                    count -= 1;
+                for (int i  = 0; i < count; i++)
+                {
+                    User u = users[i];
+                    if (u.PermissionLevel <= 2) //We do not want to list super referees.
+                    {
+                        Label l = new Label();
+                        l.Text = u.Username + "  "; //Two spaces for some padding against the button.
+                        Button but = new Button();
+                        bool isRevoke = false;
+                        if (u.PermissionLevel >= 2)
+                        {
+                            l.ForeColor = refereeColor;
+                            but.Text = "Revoke";
+                            isRevoke = true;
+                        }
+                        else
+                        {
+                            l.ForeColor = nonRefereeColor;
+                            but.Text = "Add";
+                        }
+
+                        but.CommandArgument = CreateAddRevokeArgument(u.ID, isRevoke);
+                        but.Command += But_Command;
+
+                        Panel_CreateReferee.Controls.Add(l);
+                        Panel_CreateReferee.Controls.Add(but);
+                        Panel_CreateReferee.Controls.Add(new LiteralControl("<br />"));
+                    }
+                }
+
+                if (users.Count > currentUserPage + usersPerPage)
+                {
+                    Button nextButton = new Button();
+
+                }
+                
 
                 //Slow loading this is a temporary solution
                 //System.Threading.Thread.Sleep(1000);
@@ -64,13 +97,57 @@ namespace DebateSchedulerFinal
                 }
             }
         }
-
-
-        private void ShowRefereeMakerInfo(string messsage, Color color)
+        
+        /// <summary>
+        /// Creates an add revoke argument used for button presses.
+        /// </summary>
+        /// <param name="userID">The user's id to store.</param>
+        /// <param name="isRevoke">Whether when the button is clicked referee status is revoke (if true) or added (if false).</param>
+        /// <returns>Returns an argument string.</returns>
+        private string CreateAddRevokeArgument(int userID, bool isRevoke)
         {
-            Label_RefereeMakerInfo.ForeColor = color;
-            Label_RefereeMakerInfo.Text = messsage;
-            Label_RefereeMakerInfo.Visible = true;
+            int val = 0;
+            if (isRevoke)
+                val = 1;
+            return userID + ":" + val;
+        }
+
+        /// <summary>
+        /// Parses an add revoke argument used for button presses.
+        /// </summary>
+        /// <param name="value">The add revoke argument.</param>
+        /// <param name="userID">The resultant user id stored in the argument.</param>
+        /// <param name="isRevoke">The resultant boolean stored in the argument 
+        /// which if true means the button should revoke referee status, if false it should add it.</param>
+        private void ParseAddRevokeArgument(string value, out int userID, out bool isRevoke)
+        {
+            string[] result = value.Split(':');
+            userID = int.Parse(result[0]);
+            int val = int.Parse(result[1]);
+            if (val == 1)
+                isRevoke = true;
+            else
+                isRevoke = false;
+        }
+
+        private void But_Command(object sender, CommandEventArgs e)
+        {
+            int userID;
+            bool revokeStatus;
+            ParseAddRevokeArgument(e.CommandArgument as string, out userID, out revokeStatus);
+
+            User user = DatabaseHandler.GetUser(Session, userID);
+            if (revokeStatus)
+            {
+                user.PermissionLevel = 1;
+            }
+            else
+            {
+                user.PermissionLevel = 2;
+            }
+
+            DatabaseHandler.UpdateUser(Session, user);
+            Response.Redirect(Request.RawUrl);
         }
 
         private void ShowNewsInfo(string message, Color color)
@@ -78,70 +155,6 @@ namespace DebateSchedulerFinal
             Label_NewsInfo.ForeColor = color;
             Label_NewsInfo.Text = message;
             Label_NewsInfo.Visible = true;
-        }
-
-        protected void Button_RefereeMaker_Click(object sender, EventArgs e)
-        {
-            User user = DatabaseHandler.GetUser(Session, TextBox_RefereeMaker.Text);
-            if (user != null)
-            {
-                int currentPermissionLevel = user.PermissionLevel;
-                int refereePermissionLevel = Help.GetPermissionLevel("Referee");
-                if (currentPermissionLevel < refereePermissionLevel)
-                {
-                    user.PermissionLevel = refereePermissionLevel;
-
-                    bool result = DatabaseHandler.UpdateUser(Session, user);
-                    if (result)
-                    {
-                        ShowRefereeMakerInfo(TextBox_RefereeMaker.Text + " is now a referee.", Color.Green);
-                    }
-                    else
-                    {
-                        ShowRefereeMakerInfo("An error occured while making the user " + TextBox_RefereeMaker.Text + " a referee.", Color.Red);
-                    }
-                }
-                else// if (currentPermissionLevel == refereePermissionLevel)
-                {
-                    ShowRefereeMakerInfo(TextBox_RefereeMaker.Text + " is already a referee!", Color.Red);
-                }
-            }
-            else
-            {
-                ShowRefereeMakerInfo("User does not exist!", Color.Red);
-            }
-
-        }
-
-        protected void Button_RevokeReferee_Click(object sender, EventArgs e)
-        {
-            User user = DatabaseHandler.GetUser(Session, TextBox_RefereeMaker.Text);
-
-            if (user != null)
-            {
-                if (user.PermissionLevel <= Help.GetPermissionLevel("Referee"))
-                {
-                    user.PermissionLevel = 1;
-                    bool result = DatabaseHandler.UpdateUser(Session, user);
-                    if (result)
-                    {
-                        ShowRefereeMakerInfo(TextBox_RefereeMaker.Text + " is no longer a referee.", Color.Green);
-                    }
-                    else
-                    {
-                        ShowRefereeMakerInfo("An error occured while revoking referee status of the user " + TextBox_RefereeMaker.Text + ".", Color.Red);
-                    }
-                }
-                else
-                {
-                    ShowRefereeMakerInfo("Cannot revoke super referees.", Color.Red);
-                }
-                
-            }
-            else
-            {
-                ShowRefereeMakerInfo("User does not exist!", Color.Red);
-            }
         }
 
         protected void Button_SubmitNews_Click(object sender, EventArgs e)
@@ -229,6 +242,26 @@ namespace DebateSchedulerFinal
                 Label_CodeResult.Visible = true;
                 Label_CodeResult.Text = "There has been an error generating a new code.";
                 Label_CodeResult.ForeColor = Color.Red;
+            }
+        }
+
+        protected void Button_ViewLog_Click(object sender, EventArgs e)
+        {
+            Button_ViewLog.Visible = false;
+
+            string[] logLines = DatabaseHandler.GetLog(Session);
+
+            Label_LogTitle.Text = "Logs as of " + DateTime.Now;
+
+            if (logLines != null)
+            {
+                foreach (string s in logLines)
+                {
+                    Label l = new Label();
+                    l.Text = s;
+                    Panel_ViewLog.Controls.AddAt(2, l);
+                    Panel_ViewLog.Controls.AddAt(2, new LiteralControl("<br /> <br />"));
+                }
             }
         }
     }

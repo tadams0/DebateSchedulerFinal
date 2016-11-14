@@ -575,5 +575,17 @@ namespace DebateSchedulerFinal
             return result;
         }
 
+        /// <summary>
+        /// This writes a script, embeds it into the client's html and runs it causing a post back to occur (thus refreshing the page's contents).
+        /// </summary>
+        public static void ForcePostBack(System.Web.UI.Page page)
+        {
+            StringBuilder sbScript = new StringBuilder();
+            sbScript.Append("<script>\n");
+            sbScript.Append(page.ClientScript.GetPostBackEventReference(page, "PBArg") + ";\n");
+            sbScript.Append("</script>\n");
+            page.ClientScript.RegisterStartupScript(page.GetType(),"AutoPostBackScript", sbScript.ToString());
+        }
+
     }
 }
