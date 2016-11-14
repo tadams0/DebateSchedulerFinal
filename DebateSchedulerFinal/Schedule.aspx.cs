@@ -399,7 +399,7 @@ namespace DebateSchedulerFinal
             ViewState["date"] = dateOrder;
             ViewState["team"] = teamOrder;
 
-            ForcePostBack();
+            Help.ForcePostBack(this);
         }
 
         protected void Calendar1_SelectionChanged(object sender, EventArgs e)
@@ -422,18 +422,6 @@ namespace DebateSchedulerFinal
             }
         }
 
-        /// <summary>
-        /// This writes a script, embeds it into the client's html and runs it causing a post back to occur (thus refreshing the page's contents).
-        /// </summary>
-        private void ForcePostBack()
-        {
-            StringBuilder sbScript = new StringBuilder();
-            sbScript.Append("<script>\n");
-            sbScript.Append(ClientScript.GetPostBackEventReference(this, "PBArg") + ";\n");
-            sbScript.Append("</script>\n");
-            RegisterStartupScript("AutoPostBackScript", sbScript.ToString());
-        }
-
         protected void Button_Search_Click(object sender, EventArgs e)
         {
             dateOrder = int.Parse(DropDownList_Date.SelectedValue);
@@ -444,7 +432,7 @@ namespace DebateSchedulerFinal
             ViewState["date"] = dateOrder;
             ViewState["team"] = teamOrder;
 
-            ForcePostBack();
+            Help.ForcePostBack(this);
         }
     }
 }

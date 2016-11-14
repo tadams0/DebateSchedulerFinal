@@ -47,6 +47,7 @@ namespace DebateSchedulerFinal
         /// </summary>
         private static string logFileName = "logs";
 
+        private static int permissionToGetAllUsers = 3;
         private static int permissionToGetUsers = 3;
         private static int permissionToAddUsers = 3;
         private static int permissionToRemoveUsers = 3;
@@ -592,10 +593,28 @@ namespace DebateSchedulerFinal
         }
 
         /// <summary>
+        /// Gets the user with the given id.
+        /// </summary>
+        /// <param name="session">The session that is trying to find a user.</param>
+        /// <param name="id">The id of the user.</param>
+        /// <returns>Returns null if there was no id in the database, otherwise returns the user object associated with the given id.</returns>
+        public static User GetUser(HttpSessionState session, int id)
+        {
+            User currentSessionUser = Help.GetUserSession(session);
+
+            if (currentSessionUser != null && currentSessionUser.PermissionLevel >= permissionToGetUsers)
+            {
+                return GetUser(id);
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// Gets the user with the given user id.
         /// </summary>
         /// <param name="id">The id of the user.</param>
-        /// <returns>Returns null if there was no id in the database.</returns>
+        /// <returns>Returns null if there was no id in the database, otherwise returns the user object associated with the given id.</returns>
         private static User GetUser(int id)
         {
             User resultingUser = null;
@@ -611,6 +630,28 @@ namespace DebateSchedulerFinal
             }
 
             return resultingUser;
+        }
+
+        /// <summary>
+        /// Gets a range of users from the database.
+        /// </summary>
+        /// <returns>Returns a list populated with a range of users in the database. Returns an empty list if there were no users within the given range.</returns>
+        public static List<User> GetUsers(int startValue, int endValue)
+        {
+            List<User> users = new List<User>();
+
+            DataTable table = GetDataTable(GetConnectionString(), "Users", startValue, endValue, "exception occured while gathering the entire user table.");
+            foreach (DataRow row in table.Rows)
+            {
+                string username = row["Name"] as string;
+                string email = row["Email"] as string;
+                string securityQuestion = row["SecurityQuestion"] as string;
+                int permissions = (int)row["Permissions"];
+                int id = (int)row["Id"];
+                users.Add(new User(permissions, username, email, securityQuestion, id));
+             }
+
+            return users;
         }
 
         /// <summary>
