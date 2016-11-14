@@ -15,6 +15,7 @@
         <tr>
             <td style="width:49%"></td>
             <td style="width:150px;height:50px">
+                <asp:Label ID="ErrorLabel" runat="server" ForeColor="Red" Height="20px" Text="Label" Visible="false"></asp:Label>
                 <asp:Button ID="UpdateButton" runat="server" Text="Update Scores"  Width="150px" Height="50px" OnClick="UpdateButton_Click"/>
             </td>
             <td style="width:49%"></td>

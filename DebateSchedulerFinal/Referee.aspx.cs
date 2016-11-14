@@ -159,7 +159,9 @@ namespace DebateSchedulerFinal
             team2Cell.Width = nameCellWidth;
             team2Cell.HorizontalAlign = HorizontalAlign.Center;
             team1ScoreCell.Width = statsCellWidth;
+            team1ScoreCell.HorizontalAlign = HorizontalAlign.Center;
             team2ScoreCell.Width = statsCellWidth;
+            team2ScoreCell.HorizontalAlign = HorizontalAlign.Center;
             dateCell.Width = dateCellWidth;
             morningCell.Width = dateCellWidth;
             vsCell.Width = vsCellWidth;
@@ -172,7 +174,6 @@ namespace DebateSchedulerFinal
             DropDownList ddl = new DropDownList();
             ddl.ID = "ddl" + rowNum;
             ddl.Items.Add(new ListItem("", "-1")); //Unscored value
-            ddl.Items.Add(new ListItem("Forfeit", "-99")); // add list items
             ddl.Items.Add(new ListItem("0", "0"));
             ddl.Items.Add(new ListItem("1", "1"));
             ddl.Items.Add(new ListItem("2", "2"));
@@ -181,8 +182,6 @@ namespace DebateSchedulerFinal
             ddl.Items.Add(new ListItem("5", "5"));
             if (d.Team1Score == -1)
                 ddl.SelectedIndex = 0;
-            else if (d.Team1Score == -99)
-                ddl.SelectedIndex = 1;
             else
                 ddl.SelectedIndex = d.Team1Score + 2; //The + 2 is because of the 2 extra index items in ddl
             team1ScoreCell.Controls.Add(ddl);
@@ -190,7 +189,6 @@ namespace DebateSchedulerFinal
             DropDownList ddl1 = new DropDownList();
             ddl1.ID = "ddl#" + rowNum;
             ddl1.Items.Add(new ListItem("", "-1")); //Unscored value
-            ddl1.Items.Add(new ListItem("Forfeit", "-99")); // add list items
             ddl1.Items.Add(new ListItem("0", "0"));
             ddl1.Items.Add(new ListItem("1", "1"));
             ddl1.Items.Add(new ListItem("2", "2"));
@@ -199,8 +197,6 @@ namespace DebateSchedulerFinal
             ddl1.Items.Add(new ListItem("5", "5"));
             if (d.Team2Score == -1)
                 ddl1.SelectedIndex = 0;
-            else if (d.Team2Score == -99)
-                ddl1.SelectedIndex = 1;
             else
                 ddl1.SelectedIndex = d.Team2Score + 2; //The + 2 is because of the 2 extra index items in ddl
             team2ScoreCell.Controls.Add(ddl1);
@@ -234,6 +230,7 @@ namespace DebateSchedulerFinal
             User loggedUser = Help.GetUserSession(Session);
             for (int rowNum = 1; rowNum < Table1.Rows.Count; rowNum++) //Starts at row 1 since row 0 is header row.
             {
+                ErrorLabel.Visible = false;
                 int id;
                 bool success = int.TryParse(Table1.Rows[rowNum].Cells[7].Text, NumberStyles.Any, CultureInfo.InvariantCulture, out id);
                 Debate debate = DatabaseHandler.GetDebate(id);
@@ -247,7 +244,9 @@ namespace DebateSchedulerFinal
                 }
                 else if (debate.Team1Score >= 0 || debate.Team2Score >= 0) //If this runs then both teams were not assigned a valid score and only one of them was.
                 {
-                    //Display error, you must update both teams not just one...
+                    ErrorLabel.Text = "Both teams must be scored. Check Debate " + debate.ID;
+                    ErrorLabel.Visible = true;
+                    break; //Stops the loop so the user can fix the information before submitting the rest.
                 }
             }
             if (loggedUser.PermissionLevel == 2)
