@@ -47,17 +47,18 @@ namespace DebateSchedulerFinal
         /// </summary>
         private static string logFileName = "logs";
 
+        private static int permissionToGetAllUsers = 3;
         private static int permissionToGetUsers = 3;
         private static int permissionToAddUsers = 3;
         private static int permissionToRemoveUsers = 3;
         private static int permissionToUpdateUsers = 3;
 
         private static int permissionToAddTeams = 3;
-        private static int permissionToUpdateTeams = 3;
+        private static int permissionToUpdateTeams = 2;
         private static int permissionToRemoveTeams = 3;
 
         private static int permissionToAddDebates = 3;
-        private static int permissionToUpdateDebates = 3;
+        private static int permissionToUpdateDebates = 2;
         private static int permissionToRemoveDebates = 3;
         private static int permissionToClearDebates = 4; //Debates cannot be removed.
 
@@ -68,12 +69,16 @@ namespace DebateSchedulerFinal
         private static int permissionToViewLogs = 3;
 
         private static int permissionToAddSeasons = 3;
-        private static int permissionToUpdateSeasons = 3;
+        private static int permissionToUpdateSeasons = 2;
         private static int permissionToRemoveSeasons = 4; //debate seasons cannot be removed.
 
         private static int permissionToAddUserCodes = 3;
         private static int permissionToGetActiveUserCodes = 3;
+
+        private static int permissionToResetDatabase = 99; //The database can absolutely not be reset except in special circumstances.
         
+        
+
         /// <summary>
         /// Gets a data table in a database.
         /// </summary>
@@ -124,7 +129,7 @@ namespace DebateSchedulerFinal
         /// <param name="startingRow">The row to start gathering data.</param>
         /// <param name="endingRow">The row to stop gathering data.</param>
         /// <returns>Returns a data table from the connected database.</returns>
-        private static DataTable GetDataTable(string connectionString, string table, int startingRow, int endingRow, string exceptionInfo = "")
+        private static DataTable GetDataTable(string connectionString, string table, int startingRow, int endingRow, bool fromTop, string exceptionInfo = "")
         {
             DataTable resultingTable = null;
 
@@ -132,10 +137,12 @@ namespace DebateSchedulerFinal
 
             try
             {
-                //SqlCommand command = new SqlCommand("SELECT * FROM " + table + " WHERE Id BETWEEN " + startingRow + " AND " + endingRow, connection);
-                //SqlCommand command = new SqlCommand("SELECT * FROM " + table + " LIMIT 10, 10", connection);
-                SqlCommand command = new SqlCommand("SELECT * FROM (SELECT TOP " + endingRow + " ROW_NUMBER() OVER(ORDER BY Id) AS RowNr, * FROM " + table + ") as alias WHERE RowNr BETWEEN " + startingRow + " AND " + endingRow, connection);
-                //SqlCommand command = new SqlCommand("SELECT * FROM " + table + " OFFSET " + startingRow + " ROWS FETCH NEXT " + (endingRow - startingRow) + " ROWS ONLY;", connection);
+                SqlCommand command;
+                if (fromTop)
+                    command = new SqlCommand("SELECT * FROM (SELECT TOP " + endingRow + " ROW_NUMBER() OVER(ORDER BY Id ASC) AS RowNr, * FROM " + table + ") as alias WHERE RowNr BETWEEN " + startingRow + " AND " + endingRow, connection);
+                else
+                    command = new SqlCommand("SELECT * FROM (SELECT TOP " + endingRow + " ROW_NUMBER() OVER(ORDER BY Id DESC) AS RowNr, * FROM " + table + ") as alias WHERE RowNr BETWEEN " + startingRow + " AND " + endingRow, connection);
+
                 using (SqlDataAdapter adapter = new SqlDataAdapter(command))
                 {
                     resultingTable = new DataTable();
@@ -359,6 +366,51 @@ namespace DebateSchedulerFinal
         }
 
         /// <summary>
+        /// Resets all the tables in the database, excluding the ones given.
+        /// </summary>
+        /// <param name="session">The session deleting the database.</param>
+        /// <param name="connectionString">The connection string to the database to reset.</param>
+        /// <param name="excludedTables">The tables to exclude when resetting the database, enter none for an entire database whipe.</param>
+        /// <returns>Returns true if the database was successfully resetted. False if the database errored (this can result in a broken database).</returns>
+        public static bool ResetDatabase(HttpSessionState session, params string[] excludedTables)
+        {
+            User sessionUser = Help.GetUserSession(session);
+
+            if (sessionUser != null && sessionUser.PermissionLevel >= permissionToResetDatabase)
+            {
+                string[] tables = { "Debates", "News", "Seasons", "Teams", "UserCodes", "Users" };
+                foreach (string s in excludedTables)
+                {
+                    for (int i = tables.Length - 1; i >= 0; i--)
+                    {
+                        if (tables[i].ToUpperInvariant() == s.ToUpperInvariant())
+                        {
+                            tables[i] = null;
+                        }
+                    }
+                }
+                foreach (string table in tables)
+                {
+                    if (table != null)
+                    {
+                        SqlDataReader reader1 = ExecuteSQL(GetConnectionString(), "DELETE FROM " + table, "exception occured while deleting the rows from the table " + table);
+                        if (reader1 != null)
+                        {
+                            SqlDataReader reader2 = ExecuteSQL(GetConnectionString(), "ALTER TABLE " + table + " AUTO_INCREMENT = 1", "exception occured while reseting the increment of the table " + table);
+                            if (reader2 != null)
+                            {
+                                Log(sessionUser, sessionUser.Username + " cleared and reset the table in the database called " + table + "!");
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Gets the connection string that can be used to connection to the user table within the database.
         /// </summary>
         /// <returns>Returns the connection string to the user table in the database.</returns>
@@ -395,7 +447,7 @@ namespace DebateSchedulerFinal
             User resultingUser = null;
             string realUsername = username.ToUpperInvariant(); //The username is converted to the upper invariant (upper case) to prevent case sensitivity on usernames.
             
-            DataTable table = GetDataTable(GetConnectionString(), "Users", "Name", username, SqlDbType.NChar, 50, false, "exception occured while authenticating username/password.");
+            DataTable table = GetDataTable(GetConnectionString(), "Users", "Name", realUsername, SqlDbType.NChar, 50, false, "exception occured while authenticating username/password.");
 
             if (table.Rows.Count > 0)
             {
@@ -479,6 +531,25 @@ namespace DebateSchedulerFinal
         }
 
         /// <summary>
+        /// Checks whether a user id already exists in the database.
+        /// </summary>
+        /// <param name="id">The user id to check.</param>
+        /// <returns>Returns true if the user exists, false otherwise.</returns>
+        public static bool UserExists(int id)
+        {
+            DataTable table = GetDataTable(GetConnectionString(), "Users", "Id", id.ToString(), SqlDbType.Int, int.MaxValue, false, "exception occured while checking if a user exists by id.");
+
+            if (table.Rows.Count > 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Gets and returns the security question of the given username.
         /// </summary>
         /// <param name="username">The username of the user.</param>
@@ -543,10 +614,28 @@ namespace DebateSchedulerFinal
         }
 
         /// <summary>
+        /// Gets the user with the given id.
+        /// </summary>
+        /// <param name="session">The session that is trying to find a user.</param>
+        /// <param name="id">The id of the user.</param>
+        /// <returns>Returns null if there was no id in the database, otherwise returns the user object associated with the given id.</returns>
+        public static User GetUser(HttpSessionState session, int id)
+        {
+            User currentSessionUser = Help.GetUserSession(session);
+
+            if (currentSessionUser != null && currentSessionUser.PermissionLevel >= permissionToGetUsers)
+            {
+                return GetUser(id);
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// Gets the user with the given user id.
         /// </summary>
         /// <param name="id">The id of the user.</param>
-        /// <returns>Returns null if there was no id in the database.</returns>
+        /// <returns>Returns null if there was no id in the database, otherwise returns the user object associated with the given id.</returns>
         private static User GetUser(int id)
         {
             User resultingUser = null;
@@ -562,6 +651,32 @@ namespace DebateSchedulerFinal
             }
 
             return resultingUser;
+        }
+
+        /// <summary>
+        /// Gets a range of users from the database.
+        /// </summary>
+        /// <returns>Returns a list populated with a range of users in the database. Returns an empty list if there were no users within the given range.</returns>
+        public static List<User> GetUsers(HttpSessionState session, int startValue, int endValue)
+        {
+            List<User> users = new List<User>();
+            User loggedUser = Help.GetUserSession(session);
+
+            if (loggedUser != null && loggedUser.PermissionLevel >= permissionToGetAllUsers) //The user must exist and their permissions must be high enough.
+            {
+                DataTable table = GetDataTable(GetConnectionString(), "Users", startValue, endValue, true, "exception occured while gathering a portion of the user table.");
+                foreach (DataRow row in table.Rows)
+                {
+                    string username = row["Name"] as string;
+                    string email = row["Email"] as string;
+                    string securityQuestion = row["SecurityQuestion"] as string;
+                    int permissions = (int)row["Permissions"];
+                    int id = (int)row["Id"];
+                    users.Add(new User(permissions, username, email, securityQuestion, id));
+                }
+            }
+
+            return users;
         }
 
         /// <summary>
@@ -667,7 +782,8 @@ namespace DebateSchedulerFinal
             User updatingUser = Help.GetUserSession(session);
             if (updatingUser != null && updatingUser.PermissionLevel >= permissionToUpdateUsers) //If the user's permission level is high enough
             {
-                if (UserExists(user.Username)) //We ensure that the data exists, otherwise we cannot update something that doesn't exist.
+                User storedUser = GetUser(user.ID);
+                if (storedUser != null) //We ensure that the data exists, otherwise we cannot update something that doesn't exist.
                 {
                     string sqlQuery = "UPDATE Users SET " +
                                 "Name = @Name, Email = @Email, Permissions = @Permissions, SecurityQuestion = @SecurityQuestion" +
@@ -691,6 +807,50 @@ namespace DebateSchedulerFinal
                     {
                         Log(updatingUser.Username,
                             updatingUser.Username + " updated a user with the username " + user.Username);
+
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Updates a user with the given user object.
+        /// </summary>
+        /// <param name="session">The session that is updating the user.</param>
+        /// <param name="user">The user object, whose data will replace the current data in the database.</param>
+        /// <param name="oldPassword">The old password the user is currently using.</param>
+        /// <param name="newPassword">The new password that is being assigned to the user.</param>
+        /// <returns>Returns true if the update worked, false otherwise.</returns>
+        public static bool ChangeUserPassword(HttpSessionState session, User user, string oldPassword, string newPassword, bool log)
+        {
+            User updatingUser = Help.GetUserSession(session);
+            if (updatingUser != null) //If the user really exists
+            {
+                User storedUser = AuthenticateUsernamePassword(user.Username, oldPassword);
+                if (storedUser != null) //We ensure that the data exists, otherwise we cannot update something that doesn't exist.
+                {
+                    string sqlQuery = "UPDATE Users SET " +
+                                "Password = @Password" +
+                                " WHERE Id = " + user.ID;
+                    //ID is omitted because changing it will result in incorrect foreign keys in the debates table.
+
+                    //Generating the parameters, this is done for sanitization reasons.
+                    SqlParameter passwordParameter = new SqlParameter("@Password", SqlDbType.NVarChar, newPassword.Length); //It is important the size is the size of the string and no the max limit.
+                    passwordParameter.Value = newPassword;
+
+                    SqlDataReader result = ExecuteSQL(GetConnectionString(), sqlQuery, "exception occured while updating a user's password.",
+                        passwordParameter);
+
+                    if (result != null)
+                    {
+                        if (log)
+                        {
+                            Log(updatingUser.Username,
+                            updatingUser.Username + " updated their password.");
+                        }
 
                         return true;
                     }
@@ -772,6 +932,36 @@ namespace DebateSchedulerFinal
             else
             {
                 //There is no user logged in or the permission level is too low.
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Removes a user by their id. Permissions can be circumvented by using the same id as the session.
+        /// </summary>
+        /// <param name="session">The session deleting the user.</param>
+        /// <param name="id">The user id of the user to remove.</param>
+        /// <returns>Returns true if the user was successfully removed, returns false otherwise.</returns>
+        public static bool RemoveUser(HttpSessionState session, int id)
+        {
+            User currentSessionUser = Help.GetUserSession(session); //Get the current user who is running this code.
+            if (currentSessionUser != null 
+                && (currentSessionUser.PermissionLevel >= permissionToRemoveUsers || currentSessionUser.ID == id)) //If the user exists and their permission level is super referee or greater...
+            {
+                if (UserExists(id)) //If the username does exist.
+                {
+                    string sqlQuery = "DELETE FROM Users WHERE Id = @Value";
+                    SqlParameter parameter = new SqlParameter("@Value", SqlDbType.Int);
+                    parameter.Value = id;
+
+                    SqlDataReader result = ExecuteSQL(GetConnectionString(), sqlQuery, "exception occured while removing a user by id.", parameter);
+                    if (result != null) //If the result is not null, then the query succeeded and should be logged.
+                    {
+                        Log(currentSessionUser, currentSessionUser.Username + " removed a user with the id of " + id);
+                        return true;
+                    }
+                }
             }
 
             return false;
@@ -974,7 +1164,7 @@ namespace DebateSchedulerFinal
         /// <param name="session">The current session, used to determine the user performing this action.</param>
         /// <param name="id">The id of the team to remove.</param>
         /// <returns>Returns true if the team was properly removed, false if it was not.</returns>
-        public static bool RemoveTeam(HttpSessionState session, int id)
+        public static bool RemoveTeam(HttpSessionState session, int id, bool log)
         {
             User currentSessionUser = Help.GetUserSession(session); //Get the current user who is running this code.
             if (currentSessionUser != null && currentSessionUser.PermissionLevel >= permissionToRemoveTeams) //If the user exists and their permission level is super referee or greater...
@@ -990,7 +1180,10 @@ namespace DebateSchedulerFinal
 
                     if (result != null) //If the result is not null, then the query succeeded and should be logged.
                     {
-                        Log(currentSessionUser, currentSessionUser.Username + " removed a team with the data of " + team.ToString());
+                        if (log)
+                        {
+                            Log(currentSessionUser, currentSessionUser.Username + " removed a team with the data of " + team.ToString());
+                        }
                         return true;
                     }
                 }
@@ -1094,6 +1287,57 @@ namespace DebateSchedulerFinal
         }
 
         /// <summary>
+        /// Gets a debate from the database based on its ID.
+        /// </summary>
+        /// <param name="id">The ID of the debate.</param>
+        /// <returns>Returns a debate object which contains all the data of the matching debate in the database. This will be null if there is no matching debate.</returns>
+        private static Debate GetDebate(int id, out int team1ID, out int team2ID)
+        {
+            Debate resultingDebate = null;
+
+            DataTable table = GetDataTable(GetConnectionString(), "Debates", "Id", id.ToString(), SqlDbType.Int, int.MaxValue, true, "exception occured while gathering a single debate by ID.");
+            team1ID = -1;
+            team2ID = -1;
+
+            if (table.Rows.Count > 0)
+            {
+                int matchedID = (int)table.Rows[0]["Id"];
+                team1ID = (int)table.Rows[0]["TID1"];
+                team2ID = (int)table.Rows[0]["TID2"];
+                int team1Score = (int)table.Rows[0]["T1Score"];
+                int team2Score = (int)table.Rows[0]["T2Score"];
+                string dateString = table.Rows[0]["Date"] as string;
+                DateTime date = Help.GetDate(dateString);
+                bool morningDebate = Convert.ToBoolean(table.Rows[0]["MorningDebate"]);
+                
+                resultingDebate = new Debate(matchedID, null, null, team1Score, team2Score, date, morningDebate);
+            }
+
+            return resultingDebate;
+        }
+
+        /// <summary>
+        /// Gets a debate's scores for each team from the database based on its ID.
+        /// </summary>
+        /// <param name="id">The ID of the debate.</param>
+        /// <returns>Returns true if a debate was found with the given id and scores were retrieved, returns false otherwise.</returns>
+        public static bool GetDebateScores(int id, out int team1Score, out int team2Score)
+        {
+            team1Score = -1;
+            team2Score = -1;
+            DataTable table = GetDataTable(GetConnectionString(), "Debates", "Id", id.ToString(), SqlDbType.Int, int.MaxValue, true, "exception occured while gathering a single debate by ID.");
+
+            if (table.Rows.Count > 0)
+            {
+                team1Score = (int)table.Rows[0]["T1Score"];
+                team2Score = (int)table.Rows[0]["T2Score"];
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Adds a new debate to the database.
         /// </summary>
         /// <param name="session">The session that is adding the debate.</param>
@@ -1189,7 +1433,7 @@ namespace DebateSchedulerFinal
                     team1Score.Value = debate.Team1Score;
                     SqlParameter team2Score = new SqlParameter("@Team2Score", SqlDbType.Int);
                     team2Score.Value = debate.Team2Score;
-
+                    
                     byte bitValue = 0;
                     if (debate.MorningDebate)
                         bitValue = 1;
@@ -1206,6 +1450,108 @@ namespace DebateSchedulerFinal
 
                     if (result != null)
                     {
+                        //Updating the team's wins/ties/losses
+                        if (debate.Team1Score > debate.Team2Score) //team 1 wins
+                        {
+                            if (debate.Team1Score >= 0 && debate.Team2Score >= 0) //We only update the wins/losses/ties and total score if both scores given were equal to or above 0.
+                            {
+                                debate.Team1.TotalScore += debate.Team1Score;
+                                debate.Team2.TotalScore += debate.Team2Score;
+                                debate.Team1.Wins++;
+                                debate.Team2.Losses++;
+                            }
+                            if (previousDebateData.Team1Score >= 0
+                                && previousDebateData.Team2Score >= 0) //There was a score, now we need to fix the scores.
+                            {
+                                debate.Team1.TotalScore -= previousDebateData.Team1Score;
+                                debate.Team2.TotalScore -= previousDebateData.Team2Score;
+                                if (previousDebateData.Team2Score > previousDebateData.Team1Score) //Team 2 won last time..
+                                {
+                                    debate.Team2.Wins--;
+                                    debate.Team1.Losses--;
+                                }
+                                else if (previousDebateData.Team1Score == previousDebateData.Team2Score) //There was a tie last time..
+                                {
+                                    debate.Team1.Ties--;
+                                    debate.Team2.Ties--;
+                                }
+                                else //Team 1 won last time too, so we do not update the wins/losses.
+                                {
+                                    debate.Team1.Wins--;
+                                    debate.Team2.Losses--;
+                                }
+                            }
+                            UpdateTeam(session, debate.Team1);
+                            UpdateTeam(session, debate.Team2);
+                        }
+                        else if (debate.Team1Score < debate.Team2Score) //team 2 wins
+                        {
+                            if (debate.Team1Score >= 0 && debate.Team2Score >= 0)
+                            {
+                                debate.Team2.TotalScore += debate.Team2Score;
+                                debate.Team1.TotalScore += debate.Team1Score;
+                                debate.Team2.Wins++;
+                                debate.Team1.Losses++;
+                            }
+                            if (previousDebateData.Team1Score >= 0
+                                && previousDebateData.Team2Score >= 0) //There was a score, now we need to fix the scores.
+                            {
+                                debate.Team1.TotalScore -= previousDebateData.Team1Score;
+                                debate.Team2.TotalScore -= previousDebateData.Team2Score;
+
+                                if (previousDebateData.Team1Score > previousDebateData.Team2Score) //Team 1 won last time..
+                                {
+                                    debate.Team1.Wins--;
+                                    debate.Team2.Losses--;
+                                }
+                                else if (previousDebateData.Team1Score == previousDebateData.Team2Score) //There was a tie last time..
+                                {
+                                    debate.Team1.Ties--;
+                                    debate.Team2.Ties--;
+                                }
+                                else //Team 2 won last time too, so we do not update the wins/losses.
+                                {
+                                    debate.Team2.Wins--;
+                                    debate.Team1.Losses--;
+                                }
+                            }
+                            UpdateTeam(session, debate.Team1);
+                            UpdateTeam(session, debate.Team2);
+                        }
+                        else //Tie
+                        {
+                            if (debate.Team1Score >= 0 && debate.Team2Score >= 0)
+                            {
+                                debate.Team2.TotalScore += debate.Team2Score;
+                                debate.Team1.TotalScore += debate.Team1Score;
+                                debate.Team1.Ties++;
+                                debate.Team2.Ties++;
+                            }
+                            if (previousDebateData.Team1Score >= 0
+                                && previousDebateData.Team2Score >= 0) //There was a score, now we need to fix the scores.
+                            {
+                                debate.Team1.TotalScore -= previousDebateData.Team1Score;
+                                debate.Team2.TotalScore -= previousDebateData.Team2Score;
+                                if (previousDebateData.Team1Score > previousDebateData.Team2Score) //Team 1 won last time..
+                                {
+                                    debate.Team1.Wins--;
+                                    debate.Team2.Losses--;
+                                }
+                                else if (previousDebateData.Team1Score < previousDebateData.Team2Score) //Team 2 won last time..
+                                {
+                                    debate.Team1.Losses--;
+                                    debate.Team2.Wins--;
+                                }
+                                else //Team 2 and 1 tied last time too so we do not update the ties.
+                                {
+                                    debate.Team2.Ties--;
+                                    debate.Team1.Ties--;
+                                }
+                            }
+                            UpdateTeam(session, debate.Team1);
+                            UpdateTeam(session, debate.Team2);
+                        }
+
                         Log(updatingUser.Username,
                             updatingUser.Username + " updated a debate from " + previousDebateData.ToString() + " to " + debate.ToString());
 
@@ -1285,7 +1631,7 @@ namespace DebateSchedulerFinal
             if (endingIndex < startingIndex) //In the event the ending index is below the starting index, the ending index becomes the starting index and only that index is selected.
                 endingIndex = startingIndex;
 
-            DataTable table = GetDataTable(GetConnectionString(), "News", startingIndex, endingIndex, "exception occured while gathering a group of news posts.");
+            DataTable table = GetDataTable(GetConnectionString(), "News", startingIndex, endingIndex, false, "exception occured while gathering a group of news posts.");
 
             if (table.Rows.Count > 0)
             {
@@ -1487,6 +1833,11 @@ namespace DebateSchedulerFinal
                 string teamsString = table.Rows[0]["Teams"] as string;
                 List<int> teamIDs = DebateSeason.ParseTeamString(teamsString);
 
+                string dateString = table.Rows[0]["StartDate"] as string;
+                DateTime date = Help.GetDate(dateString);
+
+                int length = (int)table.Rows[0]["Length"];
+
                 int id = (int)table.Rows[0]["Id"];
 
                 bool hasEnded = Convert.ToBoolean(table.Rows[0]["HasEnded"]);
@@ -1505,7 +1856,7 @@ namespace DebateSchedulerFinal
                     debates.Add(GetDebate(i));
                 }
 
-                resultingSeason = new DebateSeason(id, hasEnded, teams, debates);
+                resultingSeason = new DebateSeason(id, hasEnded, teams, debates, date, length);
             }
 
             return resultingSeason;
@@ -1549,6 +1900,28 @@ namespace DebateSchedulerFinal
             }
 
             return id;
+        }
+
+        /// <summary>
+        /// Gets the date and length of a debate season by id.
+        /// </summary>
+        /// <param name="id">The id of the debate season.</param>
+        /// <param name="length">The length of the debate season in weeks.</param>
+        /// <returns>Returns the date and length in weeks of the debate season. If the season does not exist or if there was an error, then length will be -1 and date will be DateTime.MinValue.</returns>
+        public static DateTime GetDebateSeasonDateTime(int id, out int length)
+        {
+            DateTime date = DateTime.MinValue;
+            length = -1;
+            DataTable table = GetDataTable(GetConnectionString(), "Seasons", "Id", id.ToString(), SqlDbType.Int, int.MaxValue, true, "exception occured while gathering a debate season.");
+
+            if (table.Rows.Count > 0)
+            {
+                string dateString = table.Rows[0]["StartDate"] as string;
+                date = Help.GetDate(dateString);
+                length = (int)table.Rows[0]["Length"];
+            }
+
+            return date;
         }
 
         /// <summary>
@@ -1620,6 +1993,11 @@ namespace DebateSchedulerFinal
                 string teamsString = table.Rows[0]["Teams"] as string;
                 List<int> teamIDs = DebateSeason.ParseTeamString(teamsString);
 
+                string dateString = table.Rows[0]["StartDate"] as string;
+                DateTime date = Help.GetDate(dateString);
+
+                int length = (int)table.Rows[0]["Length"];
+
                 bool hasEnded = Convert.ToBoolean(table.Rows[0]["HasEnded"]);
 
                 //Loading in the teams
@@ -1633,13 +2011,142 @@ namespace DebateSchedulerFinal
                 List<Debate> debates = new List<Debate>();
                 foreach (int i in debateIDs)
                 {
-                    debates.Add(GetDebate(i));
+                    int team1ID = -1;
+                    int team2ID = -1;
+                    Debate debate = GetDebate(i, out team1ID, out team2ID);
+                    foreach (Team t in teams)
+                    {
+                        if (t.ID == team1ID)
+                            debate.Team1 = t;
+                        if (t.ID == team2ID)
+                            debate.Team2 = t;
+                        if (debate.Team1 != null && debate.Team2 != null)
+                            break;
+                    }
+                    debates.Add(debate);
                 }
 
-                resultingSeason = new DebateSeason(id, hasEnded, teams, debates);
+                resultingSeason = new DebateSeason(id, hasEnded, teams, debates, date, length);
             }
 
             return resultingSeason;
+        }
+
+        /// <summary>
+        /// Gets a debate season by id.
+        /// </summary>
+        /// <param name="startIndex">The starting row to begin at.</param>
+        /// <param name="endIndex">The ending row to stop at.</param>
+        /// <returns>Returns a list of debate seasons populated with the debates and teams associated with it.</returns>
+        public static List<DebateSeason> GetDebateSeasons(int startIndex, int endIndex)
+        {
+            List<DebateSeason> seasons = new List<DebateSeason>();
+            DataTable table = GetDataTable(GetConnectionString(), "Seasons", startIndex, endIndex, false, "exception occured while gathering a range of debate seasons.");
+
+            foreach (DataRow row in table.Rows)
+            { 
+                string debateString = row["Debates"] as string;
+                List<int> debateIDs = DebateSeason.ParseDebateString(debateString);
+
+                string teamsString = row["Teams"] as string;
+                List<int> teamIDs = DebateSeason.ParseTeamString(teamsString);
+
+                string dateString = row["StartDate"] as string;
+                DateTime date = Help.GetDate(dateString);
+
+                int length = (int)row["Length"];
+
+                int id = (int)row["Id"];
+
+                bool hasEnded = Convert.ToBoolean(row["HasEnded"]);
+
+                //Loading in the teams
+                List<Team> teams = new List<Team>();
+                foreach (int i in teamIDs)
+                {
+                    teams.Add(GetTeam(i));
+                }
+
+                //Loading in the debates
+                List<Debate> debates = new List<Debate>();
+                foreach (int i in debateIDs)
+                {
+                    int team1ID = -1;
+                    int team2ID = -1;
+                    Debate debate = GetDebate(i, out team1ID, out team2ID);
+                    foreach (Team t in teams)
+                    {
+                        if (t.ID == team1ID)
+                            debate.Team1 = t;
+                        if (t.ID == team2ID)
+                            debate.Team2 = t;
+                        if (debate.Team1 != null && debate.Team2 != null)
+                            break;
+                    }
+                    debates.Add(debate);
+                }
+
+                seasons.Add(new DebateSeason(id, hasEnded, teams, debates, date, length));
+            }
+
+            return seasons;
+        }
+
+        /// <summary>
+        /// Scans through the list of debates in a season and checks their scores.
+        /// </summary>
+        /// <param name="id">The id of the debate season to check.</param>
+        /// <returns>Returns true if the given debate season has a score set in at least 1 debate. Returns false is an error occured or there was no score set.</returns>
+        public static bool DebateSeasonHasAScore(int id)
+        {
+            DataTable table = GetDataTable(GetConnectionString(), "Seasons", "Id", id.ToString(), SqlDbType.Int, int.MaxValue, true, "exception occured while gathering a debate season.");
+
+            if (table.Rows.Count > 0)
+            {
+                string debateString = table.Rows[0]["Debates"] as string;
+                List<int> debateIDs = DebateSeason.ParseDebateString(debateString);
+                
+                foreach (int i in debateIDs)
+                {
+                    int team1Score;
+                    int team2Score;
+                    if (GetDebateScores(i, out team1Score, out team2Score))
+                    {
+                        if (team1Score >= 0 && team2Score >= 0)
+                            return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Scans through the debates in a given season to determine if all debates have been scored.
+        /// </summary>
+        /// <param name="id">The id of the debate season to check.</param>
+        /// <returns>Returns true if all debates in the given debate season were scored. Returns false otherwise.</returns>
+        public static bool DebateSeasonScored(int id)
+        {
+            DataTable table = GetDataTable(GetConnectionString(), "Seasons", "Id", id.ToString(), SqlDbType.Int, int.MaxValue, true, "exception occured while gathering a debate season.");
+
+            if (table.Rows.Count > 0)
+            {
+                string debateString = table.Rows[0]["Debates"] as string;
+                List<int> debateIDs = DebateSeason.ParseDebateString(debateString);
+
+                foreach (int i in debateIDs)
+                {
+                    int team1Score;
+                    int team2Score;
+                    GetDebateScores(i, out team1Score, out team2Score);
+                    if (team1Score < 0 || team2Score < 0)
+                        return false; //An unscored debate was found, we now return false indicating the debate season isn't fully scored.
+                }
+                return true; //If it's passed the foreach loop then nothing was unscored otherwise it would have returned false by now.
+            }
+
+            return false; //An error occured if we made it here.
         }
 
         /// <summary>
@@ -1654,11 +2161,12 @@ namespace DebateSchedulerFinal
 
             if (currentSessionUser != null && currentSessionUser.PermissionLevel >= permissionToAddSeasons && season != null) //If the given season is not null and proper permissions are matched.
             {
-                string sqlQuery = "INSERT INTO Seasons (Debates, Teams, HasEnded) VALUES " +
-                        "(@Debates, @Teams, @Ended)";
+                string sqlQuery = "INSERT INTO Seasons (Debates, Teams, HasEnded, StartDate, Length) VALUES " +
+                        "(@Debates, @Teams, @Ended, @Date, @Length)";
 
                 string debateString = season.GetDebateString();
                 string teamString = season.GetTeamString();
+                string dateString = Help.GetDateString(season.StartDate);
 
                 byte bitValue = 0;
                 if (season.HasEnded)
@@ -1670,9 +2178,13 @@ namespace DebateSchedulerFinal
                 teams.Value = teamString;
                 SqlParameter ended = new SqlParameter("@Ended", SqlDbType.Bit);
                 ended.Value = bitValue;
+                SqlParameter date = new SqlParameter("@Date", SqlDbType.NVarChar, dateString.Length);
+                date.Value = dateString;
+                SqlParameter length = new SqlParameter("@Length", SqlDbType.Int);
+                length.Value = season.Length;
 
                 SqlDataReader result = ExecuteSQL(GetConnectionString(), sqlQuery, "exception occured while adding a new debate season.",
-                    debates,teams, ended);
+                    debates,teams, ended, date, length);
 
                 if (result != null) //If the result is not null, then the query succeeded and should be logged.
                 {
@@ -1698,12 +2210,13 @@ namespace DebateSchedulerFinal
 
             if (currentSessionUser != null && currentSessionUser.PermissionLevel >= permissionToAddSeasons && season != null) //If the given season is not null and proper permissions are matched.
             {
-                string sqlQuery = "INSERT INTO Seasons (Debates, Teams, HasEnded) " +
+                string sqlQuery = "INSERT INTO Seasons (Debates, Teams, HasEnded, StartDate, Length) " +
                     "OUTPUT INSERTED.Id "+ 
-                        "VALUES(@Debates, @Teams, @Ended)";
+                        "VALUES(@Debates, @Teams, @Ended, @Date, @Length)";
 
                 string debateString = season.GetDebateString();
                 string teamString = season.GetTeamString();
+                string dateString = Help.GetDateString(season.StartDate);
 
                 byte bitValue = 0;
                 if (season.HasEnded)
@@ -1715,10 +2228,13 @@ namespace DebateSchedulerFinal
                 teams.Value = teamString;
                 SqlParameter ended = new SqlParameter("@Ended", SqlDbType.Bit);
                 ended.Value = bitValue;
-
+                SqlParameter date = new SqlParameter("@Date", SqlDbType.NVarChar, dateString.Length);
+                date.Value = dateString;
+                SqlParameter length = new SqlParameter("@Length", SqlDbType.Int);
+                length.Value = season.Length;
 
                 object result = ExecuteSQLScaler(GetConnectionString(), sqlQuery, "exception occured while adding a new debate season.",
-                    debates, teams, ended);
+                    debates, teams, ended, date, length);
 
                 if (result != null) //If the result is not null, then the query succeeded and should be logged.
                 {
@@ -1742,11 +2258,11 @@ namespace DebateSchedulerFinal
             User updatingUser = Help.GetUserSession(session);
             if (updatingUser != null && updatingUser.PermissionLevel >= permissionToUpdateSeasons) //If the user's permission level is high enough
             {
-                DebateSeason currentSeason = GetDebateSeason(season.ID);
+                DebateSeason currentSeason = GetDebateSeason(season.ID); //This will make updating debate seasons very slow. Though this is currently no problem, it may be ideal later to remove this.
                 if (currentSeason != null) //We ensure that the data exists, otherwise we cannot update something that doesn't exist.
                 {
                     string sqlQuery = "UPDATE Seasons SET " +
-                                "Debates = @Debates, Teams = @Teams, HasEnded = @Ended" +
+                                "Debates = @Debates, Teams = @Teams, HasEnded = @Ended, StartDate = @Date, Length = @Length" +
                                 " WHERE Id = " + season.ID;
                     
                     //Generating the parameters, this is done for sanitization reasons.
@@ -1758,6 +2274,13 @@ namespace DebateSchedulerFinal
                     SqlParameter teamData = new SqlParameter("@Teams", SqlDbType.NVarChar, teamString.Length);
                     teamData.Value = teamString;
 
+                    string dateString = Help.GetDateString(season.StartDate);
+                    SqlParameter dateParameter = new SqlParameter("@Date", SqlDbType.NVarChar, dateString.Length);
+                    dateParameter.Value = dateString;
+                    
+                    SqlParameter lengthParameter = new SqlParameter("@Length", SqlDbType.Int);
+                    lengthParameter.Value = season.Length;
+
                     byte bitValue = 0;
                     if (season.HasEnded)
                         bitValue = 1;
@@ -1765,7 +2288,7 @@ namespace DebateSchedulerFinal
                     ended.Value = bitValue;
 
                     SqlDataReader result = ExecuteSQL(GetConnectionString(), sqlQuery, "exception occured while updating a debate season.",
-                        debateData, teamData, ended);
+                        debateData, teamData, ended, dateParameter, lengthParameter);
 
                     if (result != null)
                     {
@@ -1774,6 +2297,38 @@ namespace DebateSchedulerFinal
 
                         return true;
                     }
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Ends a debate season with the given id.
+        /// </summary>
+        /// <param name="session">The session that is endingf the debate season.</param>
+        /// <param name="seasonID">The id of the debate season.</param>
+        /// <returns>Returns true if the season was ended successfully, false otherwise.</returns>
+        public static bool EndDebateSeason(HttpSessionState session, int seasonID)
+        {
+            User updatingUser = Help.GetUserSession(session);
+            if (updatingUser != null && updatingUser.PermissionLevel >= permissionToUpdateSeasons) //If the user's permission level is high enough
+            {
+                string sqlQuery = "UPDATE Seasons SET " +
+                                "HasEnded = @Ended" +
+                                " WHERE Id = " + seasonID;
+                
+                SqlParameter ended = new SqlParameter("@Ended", SqlDbType.Bit);
+                ended.Value = 1;
+
+                SqlDataReader result = ExecuteSQL(GetConnectionString(), sqlQuery, "exception occured while ending a debate season.",
+                    ended);
+
+                if (result != null)
+                {
+                    Log(updatingUser.Username, updatingUser.Username + " has ended the debate season!");
+
+                    return true;
                 }
             }
 
@@ -1854,7 +2409,7 @@ namespace DebateSchedulerFinal
             User sessionUser = Help.GetUserSession(session);
             List<string> codes = new List<string>();
 
-            if (sessionUser != null && sessionUser.PermissionLevel >= permissionToAddUserCodes) //If the user exists and their permissions are high enough.
+            if (sessionUser != null && sessionUser.PermissionLevel >= permissionToGetActiveUserCodes) //If the user exists and their permissions are high enough.
             {
                 DataTable table = GetDataTable(GetConnectionString(), "UserCodes", "exception occured while gathering the user codes table.");
 

@@ -5,6 +5,7 @@ using System.Web;
 
 namespace DebateSchedulerFinal
 {
+    [Serializable]
     /// <summary>
     /// Defines a team object which contains a name, id, and stats about the team.
     /// </summary>
@@ -56,6 +57,15 @@ namespace DebateSchedulerFinal
         }
 
         /// <summary>
+        /// The rank of the team. This is not saved or updated nor loaded and must be generated based on the method in Help.
+        /// </summary>
+        public int Rank
+        {
+            get { return rank; }
+            set { rank = value; }
+        }
+
+        /// <summary>
         /// The unique ID (non-GUID based) which can be matched in the data base.
         /// </summary>
         public int ID { get { return id; } set { id = value; } }
@@ -67,6 +77,7 @@ namespace DebateSchedulerFinal
         private int losses;
         private int ties;
         private int totalScore;
+        private int rank = 0;
 
         public Team(string name, int id, int wins, int losses, int ties, int totalScore)
         {

@@ -6,6 +6,7 @@ using System.Web;
 
 namespace DebateSchedulerFinal
 {
+    [Serializable]
     public class DebateSeason
     {
 
@@ -69,19 +70,39 @@ namespace DebateSchedulerFinal
         }
 
         /// <summary>
+        /// The start date of the debate season.
+        /// </summary>
+        public DateTime StartDate
+        {
+            get { return date; }
+        }
+
+        /// <summary>
+        /// The lenght in weeks of the debate season.
+        /// </summary>
+        public int Length
+        {
+            get { return length; }
+        }
+
+        /// <summary>
         /// Gets or sets a boolean that determines if the debate season has ended (true) or is still ongoing (false).
         /// </summary>
         public bool HasEnded { get; set; }
 
         private List<Team> teams = new List<Team>();
         private List<Debate> debates = new List<Debate>();
+        private DateTime date;
+        private int length;
 
-        public DebateSeason(int id, bool hasEnded, List<Team> teams, List<Debate> debates)
+        public DebateSeason(int id, bool hasEnded, List<Team> teams, List<Debate> debates, DateTime startDate, int length)
         {
             ID = id;
             this.teams = teams;
             this.debates = debates;
             this.HasEnded = hasEnded;
+            this.date = startDate;
+            this.length = length;
         }
 
         /// <summary>

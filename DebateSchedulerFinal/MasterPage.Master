@@ -8,6 +8,11 @@
     <title>Debate Scheduler</title>
     <asp:ContentPlaceHolder ID="head" runat="server">
     </asp:ContentPlaceHolder>
+    <style type="text/css">
+        .auto-style1 {
+            height: 30px;
+        }
+    </style>
 </head>
 <body>
     <form id="form1" runat="server">
@@ -21,34 +26,37 @@
                 </td>
                 <td>
                     <div id ="Login">
-            <asp:Login ID="Login1" runat="server" Height="41px" Width="269px" BorderStyle="None" TitleText="" OnAuthenticate="Login1_Authenticate" CreateUserText="Create User" CreateUserUrl="Register.aspx" PasswordRecoveryText="Recover Lost Password" PasswordRecoveryUrl="RecoverPassword.aspx">
-            </asp:Login>
-        <div id ="Logout">
 
             <asp:Panel ID="Panel_logout" runat="server" BorderStyle="None" Font-Size="Medium" Height="83px" HorizontalAlign="Center" Visible="False" Width="177px">
-                <asp:Label ID="Label_Username" runat="server" Text="username" Font-Size="Large" Height="20px"></asp:Label>
                 <br />
-                <asp:Label ID="Label_Permissions" runat="server" Font-Size="Small" ForeColor="Red" Height="15px" Text="Label"></asp:Label>
+                <asp:HyperLink ID="HyperLink1" runat="server" Font-Size="Large" ForeColor="Black" NavigateUrl="~/UserPage.aspx">Username</asp:HyperLink>
+                <br />
+                <asp:Label ID="Label_Permissions" runat="server" Text="Label" Font-Size="Small" Height="15px" ForeColor="Red"></asp:Label>
                 <br />
                 <asp:Button ID="Button_Logout" runat="server" OnClick="Button_Logout_Click" Text="Logout" />
             </asp:Panel>
+
+            <asp:Login ID="Login1" runat="server" Height="41px" Width="269px" BorderStyle="None" TitleText="" OnAuthenticate="Login1_Authenticate" CreateUserText="Create User" CreateUserUrl="Register.aspx" PasswordRecoveryText="Recover Lost Password" PasswordRecoveryUrl="RecoverPassword.aspx">
+            </asp:Login>
+        <div id ="Logout">
 
         </div>
         </div>
                 </td>
             </tr>
             <tr>
-                <td colspan="3" style="height:30px"></td>
+                <td colspan="3" class="auto-style1"></td>
             </tr>
             <tr>
                 <td colspan="3" style="height:50px;background-color:cornflowerblue;">
-                    <asp:Menu ID="Menu1" runat="server" Orientation="Horizontal"  >
+                    <asp:Menu ID="Menu1" runat="server" Orientation="Horizontal" >
                         <Items>
                             <asp:MenuItem Text="Home" Value="Home" NavigateUrl="~/Default.aspx"></asp:MenuItem>
                             <asp:MenuItem Text="Schedule" Value="Schedule" NavigateUrl="~/Schedule.aspx"></asp:MenuItem>
                             <asp:MenuItem Text="Rankings" Value="Rankings" NavigateUrl="~/Rankings.aspx"></asp:MenuItem>
+                            <asp:MenuItem NavigateUrl="~/Archive.aspx" Text="Archive" Value="Archive"></asp:MenuItem>
                             <asp:MenuItem Text="About Us" Value="About Us" NavigateUrl="~/AboutUs.aspx"></asp:MenuItem>
-                            <asp:MenuItem Text="Contact Us" Value="Contact Us"></asp:MenuItem>
+                            <asp:MenuItem Text="Contact Us" Value="Contact Us" NavigateUrl="~/ContactUs.aspx"></asp:MenuItem>
                         </Items>
                         <StaticHoverStyle BackColor="#FF6600" ForeColor="White" BorderColor="White" BorderStyle="Solid" BorderWidth="1px" />
                         <StaticMenuItemStyle BackColor="CornflowerBlue" ForeColor="Black" HorizontalPadding="30px" />

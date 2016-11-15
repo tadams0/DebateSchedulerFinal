@@ -1,7 +1,7 @@
 ﻿
-#MainPanel
+#contentPanel
 {
-    width: 90vw;
+    width: 55vw;
     margin-left:auto;
     margin-right:auto;
 }
@@ -21,3 +21,5 @@
     margin-left:auto;
     margin-right:auto;
 }
+
+#mainTable td{ }

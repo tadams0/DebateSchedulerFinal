@@ -18,7 +18,8 @@ namespace DebateSchedulerFinal
         Wins = 1,
         Losses = 2,
         Ties = 3,
-        TotalScore = 4
+        TotalScore = 4,
+        Rank = 5
     }
 
     public enum DebateOrderVar

@@ -7,11 +7,64 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace DebateSchedulerFinal
-{
+namespace DebateSchedulerFinal {
     
     
     public partial class DebateCreator {
+        
+        /// <summary>
+        /// Panel_Title control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel Panel_Title;
+        
+        /// <summary>
+        /// Label_Title control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label Label_Title;
+        
+        /// <summary>
+        /// Panel_OngoingSeason control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel Panel_OngoingSeason;
+        
+        /// <summary>
+        /// Label3 control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label Label3;
+        
+        /// <summary>
+        /// Panel_RecreateSeason control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel Panel_RecreateSeason;
+        
+        /// <summary>
+        /// Label4 control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label Label4;
         
         /// <summary>
         /// Panel_Main control.
@@ -23,22 +76,13 @@ namespace DebateSchedulerFinal
         protected global::System.Web.UI.WebControls.Panel Panel_Main;
         
         /// <summary>
-        /// Label_ScheduleGenerator control.
+        /// Label_StartDate0 control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label Label_ScheduleGenerator;
-        
-        /// <summary>
-        /// Label_StartDate control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label Label_StartDate;
+        protected global::System.Web.UI.WebControls.Label Label_StartDate0;
         
         /// <summary>
         /// Calendar_Start control.
@@ -50,31 +94,58 @@ namespace DebateSchedulerFinal
         protected global::System.Web.UI.WebControls.Calendar Calendar_Start;
         
         /// <summary>
-        /// Label_EndDate control.
+        /// Label_EndDate0 control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label Label_EndDate;
+        protected global::System.Web.UI.WebControls.Label Label_EndDate0;
         
         /// <summary>
-        /// DropDownList1 control.
+        /// DropDownList_Weeks control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList DropDownList1;
+        protected global::System.Web.UI.WebControls.DropDownList DropDownList_Weeks;
         
         /// <summary>
-        /// Label1 control.
+        /// Label2 control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label Label1;
+        protected global::System.Web.UI.WebControls.Label Label2;
+        
+        /// <summary>
+        /// Panel_TeamGenerating control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel Panel_TeamGenerating;
+        
+        /// <summary>
+        /// DropDownList_Teams control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DropDownList DropDownList_Teams;
+        
+        /// <summary>
+        /// Label_Teams0 control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label Label_Teams0;
         
         /// <summary>
         /// Panel_Teams control.
@@ -84,24 +155,6 @@ namespace DebateSchedulerFinal
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Panel Panel_Teams;
-        
-        /// <summary>
-        /// Button_AddTeam control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button Button_AddTeam;
-        
-        /// <summary>
-        /// Button_Remove control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button Button_Remove;
         
         /// <summary>
         /// Label_ScheduleError control.

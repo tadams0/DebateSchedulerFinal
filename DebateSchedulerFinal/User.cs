@@ -8,12 +8,13 @@ namespace DebateSchedulerFinal
     /// <summary>
     /// Defines a user object which can hold user data including the name and permission level.
     /// </summary>
+    [Serializable]
     public class User
     {
         /// <summary>
         /// The username of the user.
         /// </summary>
-        public string Username { get; private set; }
+        public string Username { get; set; }
 
         /// <summary>
         /// The email of the user.

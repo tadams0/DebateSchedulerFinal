@@ -7,8 +7,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace DebateSchedulerFinal
-{
+namespace DebateSchedulerFinal {
     
     
     public partial class AdminPanel {
@@ -77,58 +76,13 @@ namespace DebateSchedulerFinal
         protected global::System.Web.UI.WebControls.Button Button_RemoveNews;
         
         /// <summary>
-        /// Panel_CreateReferee control.
+        /// Panel_Codes control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel Panel_CreateReferee;
-        
-        /// <summary>
-        /// Label_CreateReferee control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label Label_CreateReferee;
-        
-        /// <summary>
-        /// TextBox_RefereeMaker control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox TextBox_RefereeMaker;
-        
-        /// <summary>
-        /// Label_RefereeMakerInfo control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label Label_RefereeMakerInfo;
-        
-        /// <summary>
-        /// Button_RefereeMaker control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button Button_RefereeMaker;
-        
-        /// <summary>
-        /// Button_RevokeReferee control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button Button_RevokeReferee;
+        protected global::System.Web.UI.WebControls.Panel Panel_Codes;
         
         /// <summary>
         /// Label_RefereeCode control.
@@ -176,6 +130,24 @@ namespace DebateSchedulerFinal
         protected global::System.Web.UI.WebControls.Panel Panel_ActiveCodes;
         
         /// <summary>
+        /// Panel_CreateReferee control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel Panel_CreateReferee;
+        
+        /// <summary>
+        /// Label_CreateReferee control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label Label_CreateReferee;
+        
+        /// <summary>
         /// Panel_ViewLog control.
         /// </summary>
         /// <remarks>
@@ -185,6 +157,15 @@ namespace DebateSchedulerFinal
         protected global::System.Web.UI.WebControls.Panel Panel_ViewLog;
         
         /// <summary>
+        /// Panel_ViewLogTitle control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel Panel_ViewLogTitle;
+        
+        /// <summary>
         /// Label_LogTitle control.
         /// </summary>
         /// <remarks>
@@ -192,5 +173,14 @@ namespace DebateSchedulerFinal
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Label Label_LogTitle;
+        
+        /// <summary>
+        /// Button_ViewLog control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button Button_ViewLog;
     }
 }

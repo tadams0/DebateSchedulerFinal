@@ -6,7 +6,13 @@
 
     <div id ="NewsArea" runat ="server">
 
-        <br />
+        <asp:Panel ID="Panel_Title" runat="server" HorizontalAlign="Center">
+            <asp:Label ID="Label_Title" runat="server" Font-Size="X-Large" Text="News"></asp:Label>
+        </asp:Panel>
+        <asp:Panel ID="Panel_NoNews" runat="server" HorizontalAlign="Center" Visible="False">
+            <asp:Label ID="Label_NoNews" runat="server" Text="There is currently no news to view." Font-Size="Large"></asp:Label>
+        </asp:Panel>
+
         <br />
 
         <asp:Panel ID="Panel_News" runat="server">
