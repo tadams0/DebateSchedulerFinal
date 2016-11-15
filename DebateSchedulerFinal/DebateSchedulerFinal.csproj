@@ -145,6 +145,7 @@
     <Compile Include="DebateCreator.aspx.designer.cs">
       <DependentUpon>DebateCreator.aspx</DependentUpon>
     </Compile>
+    <Compile Include="DebateDate.cs" />
     <Compile Include="DebateSeason.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>

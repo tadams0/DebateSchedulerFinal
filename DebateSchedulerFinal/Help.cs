@@ -561,6 +561,84 @@ namespace DebateSchedulerFinal
         }
 
         /// <summary>
+        /// Sorts a list of debates into an array where each array is a different day the debates are on.
+        /// </summary>
+        /// <param name="debates">The list of debates.</param>
+        /// <returns>Returns the list of debates ordered where each list represents a different day the debates are on.</returns>
+        private static List<Debate>[] SortDebatesToPerDay(List<Debate> debates, List<DateTime> dates)
+        {
+            List<Debate>[] results = new List<Debate>[dates.Count];
+            for (int i = 0; i < results.Length; i++)
+                results[i] = new List<Debate>();
+
+            if (debates.Count > 0)
+            {
+                List<Debate> sortedList = debates.OrderBy(o => o.Date).ToList();
+                results[0].Add(sortedList[0]);
+                int currentList = 0;
+                for (int i = 1; i < debates.Count; i++)
+                {
+                    DateTime previousDate = debates[i - 1].Date;
+                    DateTime currentDate = debates[i].Date;
+                    if (currentDate != previousDate)
+                    {
+                        currentList++;
+                    }
+
+                    results[currentList].Add(debates[i]);
+                }
+            }
+
+            return results;
+        }
+
+        /// <summary>
+        /// Gets all the available dates in an array of list of debates.
+        /// </summary>
+        /// <param name="debates">The debates ordered on a per day basis.</param>
+        /// <param name="dates">The dates in the debates list.</param>
+        /// <param name="debate">The debate whose availability is being checked for.</param>
+        /// <returns>Returns a list of DebateDates, the available dates.</returns>
+        private static List<DebateDate> GetAllAvailableDates(List<Debate>[] debates, List<DateTime> dates, Debate debate)
+        {
+            List<DebateDate> debateDates = new List<DebateDate>();
+
+            bool result = true;
+            bool morning;
+            int index;
+            while (result)
+            {
+                result = GetAvailableDate(debates, debate, out index, out morning);
+                if (result)
+                {
+                    debates[index].Add(new Debate(debate.ID, debate.Team1, debate.Team2, -1, -1, dates[index], morning));
+                    debateDates.Add(new DebateDate(dates[index], morning));
+                }
+            }
+
+            return debateDates;
+        }
+
+        /// <summary>
+        /// Gets a list of available dates for a debate to be added into a list of debates.
+        /// </summary>
+        /// <param name="debates">The list of debates to check.</param>
+        /// <param name="debate">The debate that available dates will be found for.</param>
+        /// <param name="startDate">The season start date.</param>
+        /// <param name="seasonLength">The length of the debate season.</param>
+        /// <returns>Returns a list of DebateDate objects which hold the available dates the debate can fit in.</returns>
+        public static List<DebateDate> GetAllAvailableDates(List<Debate> debates, Debate debate, DateTime startDate, int seasonLength)
+        {
+            List<DateTime> dates = new List<DateTime>();
+            for (int i = 0; i < seasonLength; i++)
+            {
+                dates.Add(startDate.AddDays(7 * i));
+            }
+            List<Debate>[] debatesOrder = SortDebatesToPerDay(debates, dates);
+            return GetAllAvailableDates(debatesOrder, dates, debate);
+        }
+
+        /// <summary>
         /// Orders a list of teams by their wins and total score.
         /// </summary>
         /// <param name="teams">The list of teams.</param>
