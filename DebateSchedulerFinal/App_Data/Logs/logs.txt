@@ -1995,3 +1995,18 @@ Username: admin Message: "admin added a new user code with the value: t367mih0mh
 Username:  Message: "A user code has been anonymousely deactivated. The code was t367mih0mh" Logged at 11/14/2016 7:55:45 PM server time.
 Username: admin Message: "admin added a new news post with parameters { News Post Created By: admin on 11/14/2016 7:58:03 PM }." Logged at 11/14/2016 7:58:03 PM server time.
 Username: admin Message: "admin removed a news post with the data of { test }" Logged at 11/14/2016 7:58:09 PM server time.
+Username: admin Message: "admin added a new team with parameters { Name: test1, Wins: 0, Losses: 0, Ties: 0, Total Score: 0 }." Logged at 11/14/2016 8:52:09 PM server time.
+Username: admin Message: "admin added a new team with parameters { Name: test2, Wins: 0, Losses: 0, Ties: 0, Total Score: 0 }." Logged at 11/14/2016 8:52:09 PM server time.
+Username: admin Message: "admin added a new debate with parameters { test1 versus test2, Team 1 Score: -1, Team 2 Score: -1, On Date: 11/19/2016 12:00:00 AM and takes place in the morning }." Logged at 11/14/2016 8:52:09 PM server time.
+Username: admin Message: "admin added a new debate season with the id  { ID: 0 }." Logged at 11/14/2016 8:52:09 PM server time.
+Username: admin Message: "admin added a new team with parameters { Name: team1, Wins: 0, Losses: 0, Ties: 0, Total Score: 0 }." Logged at 11/14/2016 8:52:27 PM server time.
+Username: admin Message: "admin added a new team with parameters { Name: team2, Wins: 0, Losses: 0, Ties: 0, Total Score: 0 }." Logged at 11/14/2016 8:52:27 PM server time.
+Username: admin Message: "admin added a new debate with parameters { team1 versus team2, Team 1 Score: -1, Team 2 Score: -1, On Date: 11/19/2016 12:00:00 AM and takes place in the morning }." Logged at 11/14/2016 8:52:27 PM server time.
+Username: admin Message: "admin added a new debate season with the id  { ID: 0 }." Logged at 11/14/2016 8:52:27 PM server time.
+Username: admin Message: "admin added a new team with parameters { Name: 1234, Wins: 0, Losses: 0, Ties: 0, Total Score: 0 }." Logged at 11/14/2016 8:53:16 PM server time.
+Username: admin Message: "admin added a new team with parameters { Name: 12345, Wins: 0, Losses: 0, Ties: 0, Total Score: 0 }." Logged at 11/14/2016 8:53:16 PM server time.
+Username: admin Message: "admin added a new debate with parameters { 1234 versus 12345, Team 1 Score: -1, Team 2 Score: -1, On Date: 11/19/2016 12:00:00 AM and takes place in the morning }." Logged at 11/14/2016 8:53:16 PM server time.
+Username: admin Message: "admin added a new debate season with the id  { ID: 0 }." Logged at 11/14/2016 8:53:16 PM server time.
+Username: admin Message: "admin updated a team from { Name: 1234, Wins: 0, Losses: 0, Ties: 0, Total Score: 0 } to { Name: 1234, Wins: 0, Losses: 1, Ties: 0, Total Score: 1 }" Logged at 11/14/2016 8:53:28 PM server time.
+Username: admin Message: "admin updated a team from { Name: 12345, Wins: 0, Losses: 0, Ties: 0, Total Score: 0 } to { Name: 12345, Wins: 1, Losses: 0, Ties: 0, Total Score: 4 }" Logged at 11/14/2016 8:53:28 PM server time.
+Username: admin Message: "admin updated a debate from { 1234 versus 12345, Team 1 Score: -1, Team 2 Score: -1, On Date: 11/19/2016 12:00:00 AM and takes place in the morning } to { 1234 versus 12345, Team 1 Score: 1, Team 2 Score: 4, On Date: 11/19/2016 12:00:00 AM and takes place in the morning }" Logged at 11/14/2016 8:53:28 PM server time.

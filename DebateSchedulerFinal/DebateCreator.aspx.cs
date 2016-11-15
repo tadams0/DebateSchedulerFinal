@@ -175,119 +175,88 @@ namespace DebateSchedulerFinal
 
         protected void Button_CreateSchedule_Click(object sender, EventArgs e)
         {
-            bool errorOccured = false;
+            int currentSeasonID = Help.GetDebateSeasonID(Application);
+            bool seasonHasScore = DatabaseHandler.DebateSeasonHasAScore(currentSeasonID);
 
-            List<Team> teams = GetTeams();
-
-            if (nameError)
+            if (currentSeasonID == -1 || !seasonHasScore) //If the current debate season is -1 or if the current season does not have a score set we can create a schedule...
             {
-                Label_ScheduleError.Text = "There are errors with the info given. Some team names are invalid.";
-                Label_ScheduleError.Visible = true;
-                errorOccured = true;
-            }
+                bool errorOccured = false;
 
-            if (Calendar_Start.SelectedDates.Count <= 0)
-            {
-                Label_ScheduleError.Text = "There are errors with the info given. There is no start date specified.";
-                Label_ScheduleError.Visible = true;
-                errorOccured = true;
-            }
+                List<Team> teams = GetTeams();
 
-            if (!errorOccured)
-            {
-                Label_ScheduleError.Visible = false;
-                //Generate schedule:
-                DateTime startDate = Calendar_Start.SelectedDate;
-                int seasonLength = int.Parse(DropDownList_Weeks.SelectedValue);
-                DateTime endDate = startDate.AddDays((seasonLength - 1) * 7);
-
-                //Adding the teams to the database
-                foreach (Team t in teams)
+                if (nameError)
                 {
-                    int id;
-                    DatabaseHandler.AddTeam(Session, t, out id);
-                    t.ID = id;
+                    Label_ScheduleError.Text = "There are errors with the info given. Some team names are invalid.";
+                    Label_ScheduleError.Visible = true;
+                    errorOccured = true;
                 }
 
-                //Creating the actual debates
-                List<DateTime> saturdays = Help.SatBetween(startDate, endDate);
-                List<Debate> debates = Help.MatchMake(saturdays, teams);
-
-                if (debates != null) //Creating the debates was successful.
+                if (Calendar_Start.SelectedDates.Count <= 0)
                 {
-                    foreach (Debate d in debates)
+                    Label_ScheduleError.Text = "There are errors with the info given. There is no start date specified.";
+                    Label_ScheduleError.Visible = true;
+                    errorOccured = true;
+                }
+
+                if (!errorOccured)
+                {
+                    Label_ScheduleError.Visible = false;
+                    //Generate schedule:
+                    DateTime startDate = Calendar_Start.SelectedDate;
+                    int seasonLength = int.Parse(DropDownList_Weeks.SelectedValue);
+                    DateTime endDate = startDate.AddDays((seasonLength - 1) * 7);
+
+                    //Adding the teams to the database
+                    foreach (Team t in teams)
                     {
-                        int assignedID;
-                        d.Team1Score = -1;
-                        d.Team2Score = -1;
-                        DatabaseHandler.AddDebate(Session, d, out assignedID);
-                        d.ID = assignedID;
+                        int id;
+                        DatabaseHandler.AddTeam(Session, t, out id);
+                        t.ID = id;
                     }
 
-                    int seasonID;
-                    DebateSeason newSeason = new DebateSeason(0, false, teams, debates, startDate, seasonLength);
-                    //int test = DatabaseHandler.GetLatestSeasonID();
-                    DatabaseHandler.AddDebateSeason(Session, newSeason, out seasonID);
+                    //Creating the actual debates
+                    List<DateTime> saturdays = Help.SatBetween(startDate, endDate);
+                    List<Debate> debates = Help.MatchMake(saturdays, teams);
 
-                    Help.SetDebateID(Application, seasonID);
+                    if (debates != null) //Creating the debates was successful.
+                    {
+                        foreach (Debate d in debates)
+                        {
+                            int assignedID;
+                            d.Team1Score = -1;
+                            d.Team2Score = -1;
+                            DatabaseHandler.AddDebate(Session, d, out assignedID);
+                            d.ID = assignedID;
+                        }
 
-                    Response.Redirect(Help.scheduleURL);
+                        int seasonID;
+                        DebateSeason newSeason = new DebateSeason(0, false, teams, debates, startDate, seasonLength);
+                        //int test = DatabaseHandler.GetLatestSeasonID();
+                        DatabaseHandler.AddDebateSeason(Session, newSeason, out seasonID);
+
+                        Help.SetDebateID(Application, seasonID);
+
+                        Response.Redirect(Help.scheduleURL);
+                    }
+                    else
+                    {
+                        foreach (Team t in teams) //We must remove all the teams added to the database since there is no possible pairing.
+                            DatabaseHandler.RemoveTeam(Session, t.ID, false);
+
+                        Label_ScheduleError.Text = "A debate pairing was not found. There are too many teams for " + seasonLength + " weeks. Increase the season length.";
+                        Label_ScheduleError.Visible = true;
+
+                    }
+
                 }
-                else
-                {
-                    foreach (Team t in teams) //We must remove all the teams added to the database since there is no possible pairing.
-                        DatabaseHandler.RemoveTeam(Session, t.ID, false);
 
-                    Label_ScheduleError.Text = "A debate pairing was not found. There are too many teams for " + seasonLength + " weeks. Increase the season length.";
-                    Label_ScheduleError.Visible = true;
-
-                }
-                
             }
-
-
-        }
-
-        protected void Button_AdminTool_Click(object sender, EventArgs e)
-        {
-            DateTime startDate = new DateTime(2016, 11, 12);
-            int seasonLength = 10;
-            DateTime endDate = startDate.AddDays((seasonLength - 1) * 7);
-
-            List<Team> teams = new List<Team>();
-            for (int i = 1; i <= 10; i++)
+            else
             {
-                teams.Add(new Team("Team " + i, 0, 0, 0, 0, 0));
-            }
-            //Adding the teams to the database
-            foreach (Team t in teams)
-            {
-                int id;
-                DatabaseHandler.AddTeam(Session, t, out id);
-                t.ID = id;
+                Panel_RecreateSeason.Visible = false;
+                Response.Redirect(Request.RawUrl); //We refresh the page so that the correct view of the page is shown.
             }
 
-            //Creating the actual debates
-            List<DateTime> saturdays = Help.SatBetween(startDate, endDate);
-            List<Debate> debates = Help.MatchMake(saturdays, teams);
-
-            foreach (Debate d in debates)
-            {
-                int assignedID;
-                d.Team1Score = -1;
-                d.Team2Score = -1;
-                DatabaseHandler.AddDebate(Session, d, out assignedID);
-                d.ID = assignedID;
-            }
-
-            int seasonID;
-            DebateSeason newSeason = new DebateSeason(0, false, teams, debates, startDate, seasonLength);
-            //int test = DatabaseHandler.GetLatestSeasonID();
-            DatabaseHandler.AddDebateSeason(Session, newSeason, out seasonID);
-
-            Help.SetDebateID(Application, seasonID);
-
-            Response.Redirect(Help.scheduleURL);
         }
 
         protected void DropDownList_Teams_SelectedIndexChanged(object sender, EventArgs e)
