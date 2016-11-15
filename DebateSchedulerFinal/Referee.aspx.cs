@@ -224,7 +224,7 @@ namespace DebateSchedulerFinal
             if (d.Team1Score == -1)
                 ddl.SelectedIndex = 0;
             else
-                ddl.SelectedIndex = d.Team1Score + 2; //The + 2 is because of the 2 extra index items in ddl
+                ddl.SelectedIndex = d.Team1Score + 1; //The + 2 is because of the 1 extra index items in ddl
             team1ScoreCell.Controls.Add(ddl);
 
             DropDownList ddl1 = new DropDownList();
@@ -239,7 +239,7 @@ namespace DebateSchedulerFinal
             if (d.Team2Score == -1)
                 ddl1.SelectedIndex = 0;
             else
-                ddl1.SelectedIndex = d.Team2Score + 2; //The + 2 is because of the 2 extra index items in ddl
+                ddl1.SelectedIndex = d.Team2Score + 1; //The + 1 is because of the 1 extra index items in ddl
             team2ScoreCell.Controls.Add(ddl1);
             dateCell.Text = d.Date.ToString("MM/dd/yy");
 
