@@ -129,7 +129,7 @@ namespace DebateSchedulerFinal
         /// <param name="startingRow">The row to start gathering data.</param>
         /// <param name="endingRow">The row to stop gathering data.</param>
         /// <returns>Returns a data table from the connected database.</returns>
-        private static DataTable GetDataTable(string connectionString, string table, int startingRow, int endingRow, string exceptionInfo = "")
+        private static DataTable GetDataTable(string connectionString, string table, int startingRow, int endingRow, bool fromTop, string exceptionInfo = "")
         {
             DataTable resultingTable = null;
 
@@ -137,10 +137,12 @@ namespace DebateSchedulerFinal
 
             try
             {
-                //SqlCommand command = new SqlCommand("SELECT * FROM " + table + " WHERE Id BETWEEN " + startingRow + " AND " + endingRow, connection);
-                //SqlCommand command = new SqlCommand("SELECT * FROM " + table + " LIMIT 10, 10", connection);
-                SqlCommand command = new SqlCommand("SELECT * FROM (SELECT TOP " + endingRow + " ROW_NUMBER() OVER(ORDER BY Id) AS RowNr, * FROM " + table + ") as alias WHERE RowNr BETWEEN " + startingRow + " AND " + endingRow, connection);
-                //SqlCommand command = new SqlCommand("SELECT * FROM " + table + " OFFSET " + startingRow + " ROWS FETCH NEXT " + (endingRow - startingRow) + " ROWS ONLY;", connection);
+                SqlCommand command;
+                if (fromTop)
+                    command = new SqlCommand("SELECT * FROM (SELECT TOP " + endingRow + " ROW_NUMBER() OVER(ORDER BY Id ASC) AS RowNr, * FROM " + table + ") as alias WHERE RowNr BETWEEN " + startingRow + " AND " + endingRow, connection);
+                else
+                    command = new SqlCommand("SELECT * FROM (SELECT TOP " + endingRow + " ROW_NUMBER() OVER(ORDER BY Id DESC) AS RowNr, * FROM " + table + ") as alias WHERE RowNr BETWEEN " + startingRow + " AND " + endingRow, connection);
+
                 using (SqlDataAdapter adapter = new SqlDataAdapter(command))
                 {
                     resultingTable = new DataTable();
@@ -370,7 +372,7 @@ namespace DebateSchedulerFinal
         /// <param name="connectionString">The connection string to the database to reset.</param>
         /// <param name="excludedTables">The tables to exclude when resetting the database, enter none for an entire database whipe.</param>
         /// <returns>Returns true if the database was successfully resetted. False if the database errored (this can result in a broken database).</returns>
-        private static bool ResetDatabase(HttpSessionState session, params string[] excludedTables)
+        public static bool ResetDatabase(HttpSessionState session, params string[] excludedTables)
         {
             User sessionUser = Help.GetUserSession(session);
 
@@ -391,7 +393,7 @@ namespace DebateSchedulerFinal
                 {
                     if (table != null)
                     {
-                        SqlDataReader reader1 = ExecuteSQL(GetConnectionString(), "DROP TABLE " + table + ";", "exception occured while dropping the table " + table);
+                        SqlDataReader reader1 = ExecuteSQL(GetConnectionString(), "DELETE FROM " + table, "exception occured while deleting the rows from the table " + table);
                         if (reader1 != null)
                         {
                             SqlDataReader reader2 = ExecuteSQL(GetConnectionString(), "ALTER TABLE " + table + " AUTO_INCREMENT = 1", "exception occured while reseting the increment of the table " + table);
@@ -655,20 +657,24 @@ namespace DebateSchedulerFinal
         /// Gets a range of users from the database.
         /// </summary>
         /// <returns>Returns a list populated with a range of users in the database. Returns an empty list if there were no users within the given range.</returns>
-        public static List<User> GetUsers(int startValue, int endValue)
+        public static List<User> GetUsers(HttpSessionState session, int startValue, int endValue)
         {
             List<User> users = new List<User>();
+            User loggedUser = Help.GetUserSession(session);
 
-            DataTable table = GetDataTable(GetConnectionString(), "Users", startValue, endValue, "exception occured while gathering the entire user table.");
-            foreach (DataRow row in table.Rows)
+            if (loggedUser != null && loggedUser.PermissionLevel >= permissionToGetAllUsers) //The user must exist and their permissions must be high enough.
             {
-                string username = row["Name"] as string;
-                string email = row["Email"] as string;
-                string securityQuestion = row["SecurityQuestion"] as string;
-                int permissions = (int)row["Permissions"];
-                int id = (int)row["Id"];
-                users.Add(new User(permissions, username, email, securityQuestion, id));
-             }
+                DataTable table = GetDataTable(GetConnectionString(), "Users", startValue, endValue, true, "exception occured while gathering a portion of the user table.");
+                foreach (DataRow row in table.Rows)
+                {
+                    string username = row["Name"] as string;
+                    string email = row["Email"] as string;
+                    string securityQuestion = row["SecurityQuestion"] as string;
+                    int permissions = (int)row["Permissions"];
+                    int id = (int)row["Id"];
+                    users.Add(new User(permissions, username, email, securityQuestion, id));
+                }
+            }
 
             return users;
         }
@@ -1281,6 +1287,36 @@ namespace DebateSchedulerFinal
         }
 
         /// <summary>
+        /// Gets a debate from the database based on its ID.
+        /// </summary>
+        /// <param name="id">The ID of the debate.</param>
+        /// <returns>Returns a debate object which contains all the data of the matching debate in the database. This will be null if there is no matching debate.</returns>
+        private static Debate GetDebate(int id, out int team1ID, out int team2ID)
+        {
+            Debate resultingDebate = null;
+
+            DataTable table = GetDataTable(GetConnectionString(), "Debates", "Id", id.ToString(), SqlDbType.Int, int.MaxValue, true, "exception occured while gathering a single debate by ID.");
+            team1ID = -1;
+            team2ID = -1;
+
+            if (table.Rows.Count > 0)
+            {
+                int matchedID = (int)table.Rows[0]["Id"];
+                team1ID = (int)table.Rows[0]["TID1"];
+                team2ID = (int)table.Rows[0]["TID2"];
+                int team1Score = (int)table.Rows[0]["T1Score"];
+                int team2Score = (int)table.Rows[0]["T2Score"];
+                string dateString = table.Rows[0]["Date"] as string;
+                DateTime date = Help.GetDate(dateString);
+                bool morningDebate = Convert.ToBoolean(table.Rows[0]["MorningDebate"]);
+                
+                resultingDebate = new Debate(matchedID, null, null, team1Score, team2Score, date, morningDebate);
+            }
+
+            return resultingDebate;
+        }
+
+        /// <summary>
         /// Gets a debate's scores for each team from the database based on its ID.
         /// </summary>
         /// <param name="id">The ID of the debate.</param>
@@ -1595,7 +1631,7 @@ namespace DebateSchedulerFinal
             if (endingIndex < startingIndex) //In the event the ending index is below the starting index, the ending index becomes the starting index and only that index is selected.
                 endingIndex = startingIndex;
 
-            DataTable table = GetDataTable(GetConnectionString(), "News", startingIndex, endingIndex, "exception occured while gathering a group of news posts.");
+            DataTable table = GetDataTable(GetConnectionString(), "News", startingIndex, endingIndex, false, "exception occured while gathering a group of news posts.");
 
             if (table.Rows.Count > 0)
             {
@@ -1975,13 +2011,85 @@ namespace DebateSchedulerFinal
                 List<Debate> debates = new List<Debate>();
                 foreach (int i in debateIDs)
                 {
-                    debates.Add(GetDebate(i));
+                    int team1ID = -1;
+                    int team2ID = -1;
+                    Debate debate = GetDebate(i, out team1ID, out team2ID);
+                    foreach (Team t in teams)
+                    {
+                        if (t.ID == team1ID)
+                            debate.Team1 = t;
+                        if (t.ID == team2ID)
+                            debate.Team2 = t;
+                        if (debate.Team1 != null && debate.Team2 != null)
+                            break;
+                    }
+                    debates.Add(debate);
                 }
 
                 resultingSeason = new DebateSeason(id, hasEnded, teams, debates, date, length);
             }
 
             return resultingSeason;
+        }
+
+        /// <summary>
+        /// Gets a debate season by id.
+        /// </summary>
+        /// <param name="startIndex">The starting row to begin at.</param>
+        /// <param name="endIndex">The ending row to stop at.</param>
+        /// <returns>Returns a list of debate seasons populated with the debates and teams associated with it.</returns>
+        public static List<DebateSeason> GetDebateSeasons(int startIndex, int endIndex)
+        {
+            List<DebateSeason> seasons = new List<DebateSeason>();
+            DataTable table = GetDataTable(GetConnectionString(), "Seasons", startIndex, endIndex, false, "exception occured while gathering a range of debate seasons.");
+
+            foreach (DataRow row in table.Rows)
+            { 
+                string debateString = row["Debates"] as string;
+                List<int> debateIDs = DebateSeason.ParseDebateString(debateString);
+
+                string teamsString = row["Teams"] as string;
+                List<int> teamIDs = DebateSeason.ParseTeamString(teamsString);
+
+                string dateString = row["StartDate"] as string;
+                DateTime date = Help.GetDate(dateString);
+
+                int length = (int)row["Length"];
+
+                int id = (int)row["Id"];
+
+                bool hasEnded = Convert.ToBoolean(row["HasEnded"]);
+
+                //Loading in the teams
+                List<Team> teams = new List<Team>();
+                foreach (int i in teamIDs)
+                {
+                    teams.Add(GetTeam(i));
+                }
+
+                //Loading in the debates
+                List<Debate> debates = new List<Debate>();
+                foreach (int i in debateIDs)
+                {
+                    int team1ID = -1;
+                    int team2ID = -1;
+                    Debate debate = GetDebate(i, out team1ID, out team2ID);
+                    foreach (Team t in teams)
+                    {
+                        if (t.ID == team1ID)
+                            debate.Team1 = t;
+                        if (t.ID == team2ID)
+                            debate.Team2 = t;
+                        if (debate.Team1 != null && debate.Team2 != null)
+                            break;
+                    }
+                    debates.Add(debate);
+                }
+
+                seasons.Add(new DebateSeason(id, hasEnded, teams, debates, date, length));
+            }
+
+            return seasons;
         }
 
         /// <summary>

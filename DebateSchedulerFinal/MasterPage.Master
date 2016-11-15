@@ -54,6 +54,7 @@
                             <asp:MenuItem Text="Home" Value="Home" NavigateUrl="~/Default.aspx"></asp:MenuItem>
                             <asp:MenuItem Text="Schedule" Value="Schedule" NavigateUrl="~/Schedule.aspx"></asp:MenuItem>
                             <asp:MenuItem Text="Rankings" Value="Rankings" NavigateUrl="~/Rankings.aspx"></asp:MenuItem>
+                            <asp:MenuItem NavigateUrl="~/Archive.aspx" Text="Archive" Value="Archive"></asp:MenuItem>
                             <asp:MenuItem Text="About Us" Value="About Us" NavigateUrl="~/AboutUs.aspx"></asp:MenuItem>
                             <asp:MenuItem Text="Contact Us" Value="Contact Us" NavigateUrl="~/ContactUs.aspx"></asp:MenuItem>
                         </Items>

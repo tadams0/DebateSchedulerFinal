@@ -90,6 +90,10 @@ namespace DebateSchedulerFinal
                 Panel_News.Controls.Add(nextPanel);
 
             }
+            else //Otherwise there was no news to show!
+            {
+                Panel_NoNews.Visible = true;
+            }
 
         }
 

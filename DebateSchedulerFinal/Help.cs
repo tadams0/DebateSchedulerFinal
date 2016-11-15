@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Web;
 using System.Web.SessionState;
+using System.Web.UI.WebControls;
 
 namespace DebateSchedulerFinal
 {
@@ -28,6 +30,15 @@ namespace DebateSchedulerFinal
         public static readonly string specialCharacters = "!@#$%^&*?/";
         public static readonly Random rand = new Random();
 
+        //Variables for table creation
+        public static readonly int nameCellWidth = 250;
+        public static readonly int statsCellWidth = 90;
+        public static readonly int dateCellWidth = 150;
+        public static readonly int vsCellWidth = 30;
+        public static readonly string noScoreDisplay = "";
+
+        public static readonly Color headerTableColor = Color.CornflowerBlue;
+        public static readonly Color headerTableTextColor = Color.White;
 
         /// <summary>
         /// Gets a random letter, this can be lower or upper case.
@@ -586,6 +597,132 @@ namespace DebateSchedulerFinal
             sbScript.Append(page.ClientScript.GetPostBackEventReference(page, "PBArg") + ";\n");
             sbScript.Append("</script>\n");
             page.ClientScript.RegisterStartupScript(page.GetType(),"AutoPostBackScript", sbScript.ToString());
+        }
+
+        /// <summary>
+        /// Creates a table row for the given team object.
+        /// </summary>
+        /// <param name="t">The team.</param>
+        /// <param name="rank">The team's rank.</param>
+        /// <returns>Returns a table row representation of the given team object.</returns>
+        public static TableRow CreateTeamRow(Team t, int rank)
+        {
+            TableRow row = new TableRow();
+
+            TableCell rankCell = new TableCell();
+            TableCell nameCell = new TableCell();
+            TableCell winCell = new TableCell();
+            TableCell lossCell = new TableCell();
+            TableCell tieCell = new TableCell();
+            TableCell totalScore = new TableCell();
+
+            rankCell.Width = statsCellWidth;
+            nameCell.Width = nameCellWidth;
+            winCell.Width = statsCellWidth;
+            lossCell.Width = statsCellWidth;
+            tieCell.Width = statsCellWidth;
+            totalScore.Width = statsCellWidth;
+
+            rankCell.Text = t.Rank.ToString();
+            nameCell.Text = t.Name;
+            winCell.Text = t.Wins.ToString();
+            lossCell.Text = t.Losses.ToString();
+            tieCell.Text = t.Ties.ToString();
+
+            if (t.TotalScore >= 0)
+                totalScore.Text = t.TotalScore.ToString();
+            else
+                totalScore.Text = "0";
+
+            row.Cells.Add(rankCell);
+            row.Cells.Add(nameCell);
+            row.Cells.Add(winCell);
+            row.Cells.Add(lossCell);
+            row.Cells.Add(tieCell);
+            row.Cells.Add(totalScore);
+
+            return row;
+        }
+
+        /// <summary>
+        /// Creates a table row representation of a debate object.
+        /// </summary>
+        /// <param name="d">The debate object used to create the table row.</param>
+        /// <param name="includeVersus">If true the table row will include a column between the two team names which contains a string "vs".</param>
+        /// <returns>Returns a table row representation of the debate object.</returns>
+        public static TableRow CreateDebateRow(Debate d, bool includeVersus)
+        {
+            TableRow row = new TableRow();
+
+            TableCell team1Cell = new TableCell();
+            TableCell team2Cell = new TableCell();
+            TableCell team1ScoreCell = new TableCell();
+            TableCell team2ScoreCell = new TableCell();
+            TableCell dateCell = new TableCell();
+            TableCell morningCell = new TableCell();
+            TableCell vsCell = new TableCell();
+
+            team1Cell.Width = nameCellWidth;
+            team1Cell.HorizontalAlign = HorizontalAlign.Center;
+            team2Cell.Width = nameCellWidth;
+            team2Cell.HorizontalAlign = HorizontalAlign.Center;
+            team1ScoreCell.Width = statsCellWidth;
+            team2ScoreCell.Width = statsCellWidth;
+            dateCell.Width = dateCellWidth;
+            morningCell.Width = dateCellWidth;
+            vsCell.Width = vsCellWidth;
+            vsCell.HorizontalAlign = HorizontalAlign.Center;
+
+            team1Cell.Text = d.Team1.Name;
+            team2Cell.Text = d.Team2.Name;
+            if (d.Team1Score >= 0)
+                team1ScoreCell.Text = d.Team1Score.ToString();
+            else
+                team1ScoreCell.Text = noScoreDisplay;
+
+            if (d.Team2Score >= 0)
+                team2ScoreCell.Text = d.Team2Score.ToString();
+            else
+                team2ScoreCell.Text = noScoreDisplay;
+
+            dateCell.Text = d.Date.ToString("MM/dd/yy");
+
+            vsCell.Text = "vs";
+
+            if (d.MorningDebate)
+                morningCell.Text = "Morning";
+            else
+                morningCell.Text = "Afternoon";
+
+            row.Cells.Add(team1Cell);
+            if (includeVersus)
+                row.Cells.Add(vsCell);
+            row.Cells.Add(team2Cell);
+            row.Cells.Add(team1ScoreCell);
+            row.Cells.Add(team2ScoreCell);
+            row.Cells.Add(dateCell);
+            row.Cells.Add(morningCell);
+
+
+            return row;
+        }
+
+        /// <summary>
+        /// Determines if a given string is a valid email destination.
+        /// </summary>
+        /// <param name="email">The email.</param>
+        /// <returns>Returns true if the email is valid, false otherwise.</returns>
+        public static bool IsValidEmail(string email)
+        {
+            try
+            {
+                System.Net.Mail.MailAddress realAddress = new System.Net.Mail.MailAddress(email);
+                return realAddress.Address == email;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
     }

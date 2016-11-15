@@ -22,23 +22,6 @@ namespace DebateSchedulerFinal
             
             if (!Page.IsPostBack)
                 CheckPermissions(user);
-            
-            //if (user == null || user.PermissionLevel <= 1)
-            //{
-            //    Menu1.Items.Remove(Menu1.FindItem("Admin"));
-            //    Menu1.Items.Remove(Menu1.FindItem("Referee"));
-            //}
-            //else
-            //{
-            //    if (user.PermissionLevel < 3)
-            //    {
-            //        Menu1.Items.Remove(Menu1.FindItem("Admin"));
-            //    }
-            //    if (user.PermissionLevel < 2)
-            //    {
-            //        Menu1.Items.Remove(Menu1.FindItem("Referee"));
-            //    }
-            //}
         }
 
         public void SetPagePermissionLevel(int permissionLevel)
@@ -68,7 +51,7 @@ namespace DebateSchedulerFinal
         {
             MenuItem but = new MenuItem();
             but.NavigateUrl = "~/Referee.aspx";
-            but.Text = "Referee";
+            but.Text = "Assign Scores";
             but.Value = "R";
             return but;
         }

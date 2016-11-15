@@ -73,20 +73,58 @@
     <asp:Panel ID="Panel_ChangeUsername" runat="server" BackColor="#CCCCCC" BorderStyle="Solid" DefaultButton="Button_ChangeUsername" HorizontalAlign="Center" Visible="False">
         <asp:Label ID="Label1" runat="server" Font-Size="Medium" Text="Change Your Username"></asp:Label>
         <br />
-        <asp:Label ID="Label2" runat="server" Text="New Username:"></asp:Label>
-        <asp:TextBox ID="TextBox_Username" runat="server"></asp:TextBox>
-        <br />
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         <asp:Label ID="Label_Password" runat="server" Text="Password:"></asp:Label>
         <asp:TextBox ID="TextBox_PasswordUsername" runat="server" TextMode="Password"></asp:TextBox>
+        <br />
+        <br />
+        <asp:Label ID="Label2" runat="server" Text="New Username:"></asp:Label>
+        <asp:TextBox ID="TextBox_Username" runat="server"></asp:TextBox>
         <br />
         <asp:Button ID="Button_ChangeUsername" runat="server" OnClick="Button_ChangeUsername_Click" Text="Change Username" />
         <br />
         <asp:Label ID="Label_UsernameError" runat="server" ForeColor="Red" Text="Error" Visible="False"></asp:Label>
     </asp:Panel>
         </div>
-    &nbsp;&nbsp;&nbsp;
-    <div id ="deleteUserPanel">
+    <br />
+    <div id ="securityPanel">
+    <asp:Panel ID="Panel_ChangeSecurityQuestions" runat="server" BackColor="#CCCCCC" BorderStyle="Solid" HorizontalAlign="Center" DefaultButton="Button_ChangeSecurity">
+        <asp:Label ID="Label6" runat="server" Text="Change Your Security Questions"></asp:Label>
+        <br />
+        <asp:Label ID="Label7" runat="server" Text="Password:"></asp:Label>
+        <asp:TextBox ID="TextBox_PasswordSecurity" runat="server" TextMode="Password"></asp:TextBox>
+        <br />
+        <br />
+        <asp:Label ID="Label_NewQuestion" runat="server" Text="New Security Question:"></asp:Label>
+        <asp:TextBox ID="TextBox_SecurityQuestion" runat="server" Width="201px"></asp:TextBox>
+        <br />
+        <asp:Label ID="Label_SecurityAnswer" runat="server" Text="New Security Answer:"></asp:Label>
+        <asp:TextBox ID="TextBox_SecurityAnswer" runat="server" Width="214px"></asp:TextBox>
+        <br />
+        <asp:Button ID="Button_ChangeSecurity" runat="server" OnClick="Button_ChangeSecurity_Click" Text="Change Security Info" />
+        <br />
+        <asp:Label ID="Label_SecurityError" runat="server" ForeColor="Red" Text="Error" Visible="False"></asp:Label>
+    </asp:Panel>
+        </div>
+    <br />
+    <div id ="changeEmail">
+    <asp:Panel ID="Panel_ChangeEmail" runat="server" BackColor="#CCCCCC" BorderStyle="Solid" HorizontalAlign="Center" DefaultButton="Button_ChangeEmail">
+        <asp:Label ID="Label_EmailTitle" runat="server" Text="Change Your Email"></asp:Label>
+        <br />
+        <asp:Label ID="Label_PasswordEmail" runat="server" Text="Password:"></asp:Label>
+        <asp:TextBox ID="TextBox_PasswordEmail" runat="server" TextMode="Password"></asp:TextBox>
+        <br />
+        <br />
+        <asp:Label ID="Label_NewEmail" runat="server" Text="New Email:"></asp:Label>
+        <asp:TextBox ID="TextBox_Email" runat="server" TextMode="Email" Width="151px"></asp:TextBox>
+        <br />
+        <asp:Button ID="Button_ChangeEmail" runat="server" OnClick="Button_ChangeEmail_Click" Text="Change Email" />
+        <br />
+        <asp:Label ID="Label_EmailError" runat="server" ForeColor="Red" Text="Error" Visible="False"></asp:Label>
+    </asp:Panel>
+        </div>
+    <br />
+     <div id ="deleteUserPanel">
     <asp:Panel ID="Panel_DeleteAccount" runat="server" BackColor="#CCCCCC" BorderStyle="Solid" DefaultButton="Button_DeleteAccount" HorizontalAlign="Center">
         <asp:Label ID="Label3" runat="server" Font-Size="Medium" Text="Delete Account"></asp:Label>
         <br />

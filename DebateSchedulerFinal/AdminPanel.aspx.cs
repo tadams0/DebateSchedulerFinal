@@ -34,11 +34,16 @@ namespace DebateSchedulerFinal
                     Label codeLabel = new Label();
                     codeLabel.ForeColor = codeColor;
                     codeLabel.Text = s;
+                    Button deactiveButton = new Button();
+                    deactiveButton.Text = "Deactivate";
+                    deactiveButton.CommandArgument = s;
+                    deactiveButton.Command += DeactiveButton_Command;
                     Panel_ActiveCodes.Controls.Add(codeLabel);
+                    Panel_ActiveCodes.Controls.Add(deactiveButton);
                     Panel_ActiveCodes.Controls.Add(new LiteralControl("<br />"));
                 }
 
-                List<User> users = DatabaseHandler.GetUsers(currentUserPage, currentUserPage + usersPerPage + 1);
+                List<User> users = DatabaseHandler.GetUsers(Session,currentUserPage, currentUserPage + usersPerPage + 1);
                 int count = users.Count;
                 if (users.Count > usersPerPage)
                     count -= 1;
@@ -97,7 +102,15 @@ namespace DebateSchedulerFinal
                 }
             }
         }
-        
+
+        private void DeactiveButton_Command(object sender, CommandEventArgs e)
+        {
+            string code = e.CommandArgument as string;
+            UserCodeError error;
+            DatabaseHandler.DeactivateUserCode(code, out error);
+            Response.Redirect(Request.RawUrl);
+        }
+
         /// <summary>
         /// Creates an add revoke argument used for button presses.
         /// </summary>

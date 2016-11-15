@@ -47,23 +47,11 @@ namespace DebateSchedulerFinal
 
             if (currentDebateID != -1)
             {
-                //Gathering query values
-                // NameValueCollection queryValues = HttpUtility.ParseQueryString(Request.QueryString.ToString());
-                // string orderString = queryValues.Get("Order");
-                // string debateOrderString = queryValues.Get("dOrder");
-                // string dateOrderString = queryValues.Get("date");
-                // string teamOrderString = queryValues.Get("team");
-
                 object orderObj = ViewState["Order"];
                 object debateOrderObj = ViewState["dOrder"];
                 object dateOrderObj = ViewState["date"];
                 object teamOrderObj = ViewState["team"];
-
-                if (IsPostBack)
-                {
-
-                }
-
+                
                 if (orderObj != null)
                 {
                     order = (OrderBy)(int.Parse(orderObj.ToString()));
@@ -400,26 +388,6 @@ namespace DebateSchedulerFinal
             ViewState["team"] = teamOrder;
 
             Help.ForcePostBack(this);
-        }
-
-        protected void Calendar1_SelectionChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        /// <summary>
-        /// Makes the day unselectable and its back color "Ghost White" if it is not a Saturday.
-        /// </summary>
-        /// <param name="source"></param>
-        /// <param name="e"></param>
-        protected void DayRender(Object source, DayRenderEventArgs e)
-        {
-
-            if (e.Day.Date.DayOfWeek != DayOfWeek.Saturday)
-            {
-                e.Day.IsSelectable = false;
-                e.Cell.BackColor = System.Drawing.Color.GhostWhite;
-            }
         }
 
         protected void Button_Search_Click(object sender, EventArgs e)

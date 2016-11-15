@@ -25,25 +25,7 @@ namespace DebateSchedulerFinal
             Label_UserCreated.Visible = false;
             Label_ErrorMessage.Visible = false;
         }
-
-        /// <summary>
-        /// Determines if a given string is a valid email destination.
-        /// </summary>
-        /// <param name="email">The email.</param>
-        /// <returns>Returns true if the email is valid, false otherwise.</returns>
-        private bool IsValidEmail(string email)
-        {
-            try
-            {
-                MailAddress realAddress = new MailAddress(email);
-                return realAddress.Address == email;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
+        
         protected void CreateUserWizard_CreatingUser(object sender, LoginCancelEventArgs e)
         {
 
@@ -57,7 +39,7 @@ namespace DebateSchedulerFinal
             else
             {
                 //Email verification:
-                if (IsValidEmail(CreateUserWizard.Email))
+                if (Help.IsValidEmail(CreateUserWizard.Email))
                 {
                     string ipAddress = Request.UserHostAddress;
                     

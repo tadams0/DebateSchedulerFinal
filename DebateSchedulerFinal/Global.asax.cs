@@ -15,6 +15,8 @@ namespace DebateSchedulerFinal
             int mostRecentSeasonID = DatabaseHandler.GetMostRecentSeasonID(out activeSeason);
             if (activeSeason)
                 Help.SetDebateID(Application, mostRecentSeasonID);
+
+            
         }
     }
 }

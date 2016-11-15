@@ -27,7 +27,7 @@ namespace DebateSchedulerFinal
             {
                 Response.Redirect("Default.aspx");
             }
-            
+
 
         }
 
@@ -78,8 +78,8 @@ namespace DebateSchedulerFinal
                     Label_UsernameError.Visible = true;
                     Label_UsernameError.Text = "Password did not match.";
                 }
-                
-                
+
+
             }
 
         }
@@ -159,6 +159,75 @@ namespace DebateSchedulerFinal
                 {
                     Label_DeleteAccountError.Visible = true;
                     Label_DeleteAccountError.Text = "An error occured while removing account.";
+                }
+            }
+        }
+
+        protected void Button_ChangeSecurity_Click(object sender, EventArgs e)
+        {
+            User loggedUser = Help.GetUserSession(Session);
+            if (loggedUser != null)
+            {
+                User authenticatedUser = DatabaseHandler.AuthenticateUsernamePassword(loggedUser.Username, TextBox_PasswordSecurity.Text);
+                if (authenticatedUser != null)
+                {
+                    bool result = DatabaseHandler.UpdateUserSecurity(Session, TextBox_SecurityQuestion.Text, TextBox_SecurityAnswer.Text);
+                    if (result)
+                    {
+                        Label_SecurityError.Visible = true;
+                        Label_SecurityError.ForeColor = System.Drawing.Color.Green;
+                        Label_SecurityError.Text = "Security info was successfully updated.";
+                    }
+                    else
+                    {
+                        Label_SecurityError.Visible = true;
+                        Label_SecurityError.Text = "An unknown error occured while updating security info.";
+                    }
+                }
+                else
+                {
+                    Label_SecurityError.Visible = true;
+                    Label_SecurityError.Text = "Password is invalid or does not match.";
+                }
+
+            }
+        }
+
+        protected void Button_ChangeEmail_Click(object sender, EventArgs e)
+        {
+            User loggedUser = Help.GetUserSession(Session);
+            if (loggedUser != null)
+            {
+                User authenticatedUser = DatabaseHandler.AuthenticateUsernamePassword(loggedUser.Username, TextBox_PasswordSecurity.Text);
+                if (authenticatedUser != null)
+                {
+                    bool validEmail = Help.IsValidEmail(TextBox_Email.Text);
+                    if (validEmail)
+                    {
+                        authenticatedUser.Email = TextBox_Email.Text;
+                        bool result = DatabaseHandler.UpdateUser(Session, authenticatedUser);
+                        if (result)
+                        {
+                            Label_EmailError.Visible = true;
+                            Label_EmailError.ForeColor = System.Drawing.Color.Green;
+                            Label_EmailError.Text = "Email was changed successfully.";
+                        }
+                        else
+                        {
+                            Label_EmailError.Visible = true;
+                            Label_EmailError.Text = "An unknown error occured while updating your email.";
+                        }
+                    }
+                    else
+                    {
+                        Label_EmailError.Visible = true;
+                        Label_EmailError.Text = "The given email is invalid.";
+                    }
+                }
+                else
+                {
+                    Label_EmailError.Visible = true;
+                    Label_EmailError.Text = "Password is invalid or does not match.";
                 }
             }
         }

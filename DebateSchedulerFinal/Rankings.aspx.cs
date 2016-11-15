@@ -11,12 +11,6 @@ namespace DebateSchedulerFinal
 {
     public partial class WebForm2 : System.Web.UI.Page
     {
-        private const int nameCellWidth = 250;
-        private const int statsCellWidth = 90;
-
-        private readonly Color headerTableColor = Color.CornflowerBlue;
-        private readonly Color headerTableTextColor = Color.White;
-
         private OrderBy order = OrderBy.Ascending;
         private TeamOrderVar teamOrder = TeamOrderVar.Rank;
         private List<Team> teams;
@@ -51,7 +45,7 @@ namespace DebateSchedulerFinal
 
                 for (int i = 0; i < teams.Count; i++)
                 {
-                    TableRow teamRow = CreateTeamRow(teams[i], i);
+                    TableRow teamRow = Help.CreateTeamRow(teams[i], i);
                     Table1.Rows.Add(teamRow);
                 }
             }
@@ -74,41 +68,41 @@ namespace DebateSchedulerFinal
             TableCell tieCell = new TableCell();
             TableCell totalScore = new TableCell();
 
-            rankCell.BackColor = headerTableColor;
-            nameCell.BackColor = headerTableColor;
-            winCell.BackColor = headerTableColor;
-            lossCell.BackColor = headerTableColor;
-            tieCell.BackColor = headerTableColor;
-            totalScore.BackColor = headerTableColor;
+            rankCell.BackColor = Help.headerTableColor;
+            nameCell.BackColor = Help.headerTableColor;
+            winCell.BackColor = Help.headerTableColor;
+            lossCell.BackColor = Help.headerTableColor;
+            tieCell.BackColor = Help.headerTableColor;
+            totalScore.BackColor = Help.headerTableColor;
 
             LinkButton rankButton = new LinkButton();
             rankButton.Command += RankButton_Command;
-            rankButton.ForeColor = headerTableTextColor;
+            rankButton.ForeColor = Help.headerTableTextColor;
             rankButton.Text = "Rank";
 
             LinkButton nameButton = new LinkButton();
             nameButton.Command += NameButton_Command;
-            nameButton.ForeColor = headerTableTextColor;
+            nameButton.ForeColor = Help.headerTableTextColor;
             nameButton.Text = "Name";
 
             LinkButton winButton = new LinkButton();
             winButton.Command += WinButton_Command;
-            winButton.ForeColor = headerTableTextColor;
+            winButton.ForeColor = Help.headerTableTextColor;
             winButton.Text = "Wins";
 
             LinkButton lossButton = new LinkButton();
             lossButton.Command += LossButton_Command;
-            lossButton.ForeColor = headerTableTextColor;
+            lossButton.ForeColor = Help.headerTableTextColor;
             lossButton.Text = "Losses";
 
             LinkButton tieButton = new LinkButton();
             tieButton.Command += TieButton_Command;
-            tieButton.ForeColor = headerTableTextColor;
+            tieButton.ForeColor = Help.headerTableTextColor;
             tieButton.Text = "Ties";
 
             LinkButton totalScoreButton = new LinkButton();
             totalScoreButton.Command += TotalScoreButton_Command;
-            totalScoreButton.ForeColor = headerTableTextColor;
+            totalScoreButton.ForeColor = Help.headerTableTextColor;
             totalScoreButton.Text = "Total Score";
 
             rankCell.Controls.Add(rankButton);
@@ -176,44 +170,7 @@ namespace DebateSchedulerFinal
             Response.Redirect(url + "?" + queryValues);
         }
 
-        private TableRow CreateTeamRow(Team t, int rank )
-        {
-            TableRow row = new TableRow();
-
-            TableCell rankCell = new TableCell();
-            TableCell nameCell = new TableCell();
-            TableCell winCell = new TableCell();
-            TableCell lossCell = new TableCell();
-            TableCell tieCell = new TableCell();
-            TableCell totalScore = new TableCell();
-
-            rankCell.Width = statsCellWidth;
-            nameCell.Width = nameCellWidth;
-            winCell.Width = statsCellWidth;
-            lossCell.Width = statsCellWidth;
-            tieCell.Width = statsCellWidth;
-            totalScore.Width = statsCellWidth;
-
-            rankCell.Text = t.Rank.ToString();
-            nameCell.Text = t.Name;
-            winCell.Text = t.Wins.ToString();
-            lossCell.Text = t.Losses.ToString();
-            tieCell.Text = t.Ties.ToString();
-
-            if (t.TotalScore >= 0)
-                totalScore.Text = t.TotalScore.ToString();
-            else
-                totalScore.Text = "0";
-
-            row.Cells.Add(rankCell);
-            row.Cells.Add(nameCell);
-            row.Cells.Add(winCell);
-            row.Cells.Add(lossCell);
-            row.Cells.Add(tieCell);
-            row.Cells.Add(totalScore);
-
-            return row;
-        }
+        
 
     }
 }
