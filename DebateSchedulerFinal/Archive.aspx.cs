@@ -92,7 +92,7 @@ namespace DebateSchedulerFinal
 
             if (seasonObj == null)
             {
-                List<DebateSeason> debateSeasons = DatabaseHandler.GetDebateSeasons(seasonIndex, seasonIndex + 1);
+                List<DebateSeason> debateSeasons = DatabaseHandler.GetDebateSeasons(seasonIndex, seasonIndex);
                 if (debateSeasons.Count > 0)
                     debateSeason = debateSeasons[0];
                 else  //No debates were found.. ut oh.

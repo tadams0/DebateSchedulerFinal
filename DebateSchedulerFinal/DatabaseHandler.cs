@@ -2262,7 +2262,7 @@ namespace DebateSchedulerFinal
                 if (currentSeason != null) //We ensure that the data exists, otherwise we cannot update something that doesn't exist.
                 {
                     string sqlQuery = "UPDATE Seasons SET " +
-                                "Debates = @Debates, Teams = @Teams, HasEnded = @Ended" +
+                                "Debates = @Debates, Teams = @Teams, HasEnded = @Ended, StartDate = @Date, Length = @Length" +
                                 " WHERE Id = " + season.ID;
                     
                     //Generating the parameters, this is done for sanitization reasons.
@@ -2274,6 +2274,13 @@ namespace DebateSchedulerFinal
                     SqlParameter teamData = new SqlParameter("@Teams", SqlDbType.NVarChar, teamString.Length);
                     teamData.Value = teamString;
 
+                    string dateString = Help.GetDateString(season.StartDate);
+                    SqlParameter dateParameter = new SqlParameter("@Date", SqlDbType.NVarChar, dateString.Length);
+                    dateParameter.Value = dateString;
+                    
+                    SqlParameter lengthParameter = new SqlParameter("@Length", SqlDbType.Int);
+                    lengthParameter.Value = season.Length;
+
                     byte bitValue = 0;
                     if (season.HasEnded)
                         bitValue = 1;
@@ -2281,7 +2288,7 @@ namespace DebateSchedulerFinal
                     ended.Value = bitValue;
 
                     SqlDataReader result = ExecuteSQL(GetConnectionString(), sqlQuery, "exception occured while updating a debate season.",
-                        debateData, teamData, ended);
+                        debateData, teamData, ended, dateParameter, lengthParameter);
 
                     if (result != null)
                     {

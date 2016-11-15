@@ -2010,3 +2010,45 @@ Username: admin Message: "admin added a new debate season with the id  { ID: 0 }
 Username: admin Message: "admin updated a team from { Name: 1234, Wins: 0, Losses: 0, Ties: 0, Total Score: 0 } to { Name: 1234, Wins: 0, Losses: 1, Ties: 0, Total Score: 1 }" Logged at 11/14/2016 8:53:28 PM server time.
 Username: admin Message: "admin updated a team from { Name: 12345, Wins: 0, Losses: 0, Ties: 0, Total Score: 0 } to { Name: 12345, Wins: 1, Losses: 0, Ties: 0, Total Score: 4 }" Logged at 11/14/2016 8:53:28 PM server time.
 Username: admin Message: "admin updated a debate from { 1234 versus 12345, Team 1 Score: -1, Team 2 Score: -1, On Date: 11/19/2016 12:00:00 AM and takes place in the morning } to { 1234 versus 12345, Team 1 Score: 1, Team 2 Score: 4, On Date: 11/19/2016 12:00:00 AM and takes place in the morning }" Logged at 11/14/2016 8:53:28 PM server time.
+Username: admin Message: "admin added a new team with parameters { Name: teasm 1, Wins: 0, Losses: 0, Ties: 0, Total Score: 0 }." Logged at 11/14/2016 9:40:28 PM server time.
+Username: admin Message: "admin added a new team with parameters { Name: team2, Wins: 0, Losses: 0, Ties: 0, Total Score: 0 }." Logged at 11/14/2016 9:40:29 PM server time.
+Username: admin Message: "admin added a new debate with parameters { teasm 1 versus team2, Team 1 Score: -1, Team 2 Score: -1, On Date: 11/19/2016 12:00:00 AM and takes place in the morning }." Logged at 11/14/2016 9:40:29 PM server time.
+Username: admin Message: "admin added a new debate season with the id  { ID: -1 }." Logged at 11/14/2016 9:40:29 PM server time.
+Username: admin Message: "admin added a new team with parameters { Name: Team 3, Wins: 0, Losses: 0, Ties: 0, Total Score: 0 }." Logged at 11/14/2016 9:40:42 PM server time.
+Username: admin Message: "admin added a new team with parameters { Name: Team 4, Wins: 0, Losses: 0, Ties: 0, Total Score: 0 }." Logged at 11/14/2016 9:40:42 PM server time.
+Username: admin Message: "admin added a new debate with parameters { Team 3 versus Team 4, Team 1 Score: -1, Team 2 Score: -1, On Date: 11/19/2016 12:00:00 AM and takes place in the morning }." Logged at 11/14/2016 9:40:42 PM server time.
+Username: admin Message: "admin updated tbe debate season with the id  { ID: 22 }" Logged at 11/14/2016 9:40:42 PM server time.
+Username: admin Message: "admin added a new team with parameters { Name: Team 3, Wins: 0, Losses: 0, Ties: 0, Total Score: 0 }." Logged at 11/14/2016 9:51:47 PM server time.
+Username: admin Message: "admin added a new team with parameters { Name: Team 4, Wins: 0, Losses: 0, Ties: 0, Total Score: 0 }." Logged at 11/14/2016 9:51:47 PM server time.
+Username: admin Message: "admin added a new team with parameters { Name: team 5, Wins: 0, Losses: 0, Ties: 0, Total Score: 0 }." Logged at 11/14/2016 9:51:47 PM server time.
+Username: admin Message: "admin added a new debate with parameters { Team 3 versus Team 4, Team 1 Score: -1, Team 2 Score: -1, On Date: 11/19/2016 12:00:00 AM and takes place in the morning }." Logged at 11/14/2016 9:51:47 PM server time.
+Username: admin Message: "admin added a new debate with parameters { Team 4 versus team 5, Team 1 Score: -1, Team 2 Score: -1, On Date: 11/26/2016 12:00:00 AM and takes place in the morning }." Logged at 11/14/2016 9:51:47 PM server time.
+Username: admin Message: "admin added a new debate with parameters { Team 3 versus team 5, Team 1 Score: -1, Team 2 Score: -1, On Date: 12/3/2016 12:00:00 AM and takes place in the morning }." Logged at 11/14/2016 9:51:47 PM server time.
+Username: admin Message: "admin updated tbe debate season with the id  { ID: 22 }" Logged at 11/14/2016 9:51:47 PM server time.
+Username: admin Message: "admin added a new team with parameters { Name: Team 3, Wins: 0, Losses: 0, Ties: 0, Total Score: 0 }." Logged at 11/14/2016 10:14:08 PM server time.
+Username: admin Message: "admin added a new team with parameters { Name: Team 4, Wins: 0, Losses: 0, Ties: 0, Total Score: 0 }." Logged at 11/14/2016 10:14:08 PM server time.
+Username: admin Message: "admin added a new team with parameters { Name: team 5, Wins: 0, Losses: 0, Ties: 0, Total Score: 0 }." Logged at 11/14/2016 10:14:08 PM server time.
+Username: admin Message: "admin added a new debate with parameters { Team 4 versus team 5, Team 1 Score: -1, Team 2 Score: -1, On Date: 11/19/2016 12:00:00 AM and takes place in the morning }." Logged at 11/14/2016 10:14:08 PM server time.
+Username: admin Message: "admin added a new debate with parameters { Team 3 versus team 5, Team 1 Score: -1, Team 2 Score: -1, On Date: 11/26/2016 12:00:00 AM and takes place in the morning }." Logged at 11/14/2016 10:14:08 PM server time.
+Username: admin Message: "admin added a new debate with parameters { Team 3 versus Team 4, Team 1 Score: -1, Team 2 Score: -1, On Date: 12/3/2016 12:00:00 AM and takes place in the morning }." Logged at 11/14/2016 10:14:08 PM server time.
+Username: admin Message: "admin updated tbe debate season with the id  { ID: 22 }" Logged at 11/14/2016 10:14:08 PM server time.
+Username: admin Message: "admin added a new team with parameters { Name: Team 3, Wins: 0, Losses: 0, Ties: 0, Total Score: 0 }." Logged at 11/14/2016 10:15:24 PM server time.
+Username: admin Message: "admin added a new team with parameters { Name: Team 4, Wins: 0, Losses: 0, Ties: 0, Total Score: 0 }." Logged at 11/14/2016 10:15:24 PM server time.
+Username: admin Message: "admin added a new team with parameters { Name: team 5, Wins: 0, Losses: 0, Ties: 0, Total Score: 0 }." Logged at 11/14/2016 10:15:24 PM server time.
+Username: admin Message: "admin added a new debate with parameters { Team 4 versus team 5, Team 1 Score: -1, Team 2 Score: -1, On Date: 11/19/2016 12:00:00 AM and takes place in the morning }." Logged at 11/14/2016 10:15:24 PM server time.
+Username: admin Message: "admin added a new debate with parameters { Team 3 versus team 5, Team 1 Score: -1, Team 2 Score: -1, On Date: 11/26/2016 12:00:00 AM and takes place in the morning }." Logged at 11/14/2016 10:15:24 PM server time.
+Username: admin Message: "admin added a new debate with parameters { Team 3 versus Team 4, Team 1 Score: -1, Team 2 Score: -1, On Date: 12/3/2016 12:00:00 AM and takes place in the morning }." Logged at 11/14/2016 10:15:24 PM server time.
+Username: admin Message: "admin added a new team with parameters { Name: Team 3, Wins: 0, Losses: 0, Ties: 0, Total Score: 0 }." Logged at 11/14/2016 10:21:44 PM server time.
+Username: admin Message: "admin added a new team with parameters { Name: Team 4, Wins: 0, Losses: 0, Ties: 0, Total Score: 0 }." Logged at 11/14/2016 10:21:44 PM server time.
+Username: admin Message: "admin added a new team with parameters { Name: team 5, Wins: 0, Losses: 0, Ties: 0, Total Score: 0 }." Logged at 11/14/2016 10:21:44 PM server time.
+Username: admin Message: "admin added a new debate with parameters { Team 3 versus Team 4, Team 1 Score: -1, Team 2 Score: -1, On Date: 11/19/2016 12:00:00 AM and takes place in the morning }." Logged at 11/14/2016 10:21:44 PM server time.
+Username: admin Message: "admin added a new debate with parameters { Team 3 versus team 5, Team 1 Score: -1, Team 2 Score: -1, On Date: 11/26/2016 12:00:00 AM and takes place in the morning }." Logged at 11/14/2016 10:21:44 PM server time.
+Username: admin Message: "admin added a new debate with parameters { Team 4 versus team 5, Team 1 Score: -1, Team 2 Score: -1, On Date: 12/3/2016 12:00:00 AM and takes place in the morning }." Logged at 11/14/2016 10:21:44 PM server time.
+Username: admin Message: "admin updated tbe debate season with the id  { ID: 22 }" Logged at 11/14/2016 10:21:50 PM server time.
+Username: admin Message: "admin added a new team with parameters { Name: Team 3, Wins: 0, Losses: 0, Ties: 0, Total Score: 0 }." Logged at 11/14/2016 10:23:15 PM server time.
+Username: admin Message: "admin added a new team with parameters { Name: Team 4, Wins: 0, Losses: 0, Ties: 0, Total Score: 0 }." Logged at 11/14/2016 10:23:15 PM server time.
+Username: admin Message: "admin added a new team with parameters { Name: team 5, Wins: 0, Losses: 0, Ties: 0, Total Score: 0 }." Logged at 11/14/2016 10:23:15 PM server time.
+Username: admin Message: "admin added a new debate with parameters { Team 4 versus team 5, Team 1 Score: -1, Team 2 Score: -1, On Date: 11/26/2016 12:00:00 AM and takes place in the morning }." Logged at 11/14/2016 10:23:15 PM server time.
+Username: admin Message: "admin added a new debate with parameters { Team 3 versus Team 4, Team 1 Score: -1, Team 2 Score: -1, On Date: 12/3/2016 12:00:00 AM and takes place in the morning }." Logged at 11/14/2016 10:23:15 PM server time.
+Username: admin Message: "admin added a new debate with parameters { Team 3 versus team 5, Team 1 Score: -1, Team 2 Score: -1, On Date: 12/10/2016 12:00:00 AM and takes place in the morning }." Logged at 11/14/2016 10:23:15 PM server time.
+Username: admin Message: "admin updated tbe debate season with the id  { ID: 22 }" Logged at 11/14/2016 10:23:15 PM server time.

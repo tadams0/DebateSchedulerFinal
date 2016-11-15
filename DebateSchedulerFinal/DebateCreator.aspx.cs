@@ -16,6 +16,7 @@ namespace DebateSchedulerFinal
 
         List<TextBox> textBoxes = new List<TextBox>();
         List<Label> infoLabels = new List<Label>();
+        List<Team> updateTeams = new List<Team>();
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -38,15 +39,29 @@ namespace DebateSchedulerFinal
                 }
 
                 bool scoreSet = DatabaseHandler.DebateSeasonHasAScore(seasonID);
-                if (scoreSet)
+                if (scoreSet) //The debate season has a score already set
                 {
                     Panel_OngoingSeason.Visible = true;
                     Panel_Main.Visible = false;
                     return;
                 }
-                else
+                else if (!IsPostBack)
                 {
+                    //We can still edit the season since no scores have been set, so let's set up the schedule generator with the info.
                     Panel_RecreateSeason.Visible = true;
+                    updateTeams = DatabaseHandler.GetDebateSeasonTeams(seasonID);
+                    ViewState["teams"] = updateTeams.Count.ToString();
+                    if (DropDownList_Teams.SelectedValue != currentTeam.ToString())
+                    {
+                        DropDownList_Teams.ClearSelection();
+                        DropDownList_Teams.SelectedValue = currentTeam.ToString();
+                    }
+                    //Setting up the season parameters
+                    int length;
+                    DateTime date = DatabaseHandler.GetDebateSeasonDateTime(seasonID, out length);
+                    DropDownList_Weeks.ClearSelection();
+                    DropDownList_Weeks.SelectedValue = length.ToString();
+                    Calendar_Start.SelectedDate = date;
                 }
             }
              
@@ -70,7 +85,10 @@ namespace DebateSchedulerFinal
             }
 
             if (!IsPostBack && currentTeam > 2)
+            {
+                DropDownList_Teams.ClearSelection();
                 DropDownList_Teams.Items.FindByValue((currentTeam.ToString())).Selected = true;
+            }
             //DropDownList_Teams.Items.FindByValue((numbTeams.ToString())).Selected = true;
         }
 
@@ -102,6 +120,10 @@ namespace DebateSchedulerFinal
             label.Text = "Team " + teamNumber + ": ";
             TextBox textBox = new TextBox();
             textBox.Width = 225;
+            if (updateTeams.Count > 0)
+            {
+                textBox.Text = updateTeams[teamNumber - 1].Name;
+            }
             Label infoLabel = new Label();
             infoLabel.Text = "Team names cannot repeat!";
             infoLabel.ForeColor = Color.Red;
@@ -207,11 +229,19 @@ namespace DebateSchedulerFinal
                     DateTime endDate = startDate.AddDays((seasonLength - 1) * 7);
 
                     //Adding the teams to the database
-                    foreach (Team t in teams)
+                    for (int i = 0; i < teams.Count; i++)
                     {
-                        int id;
-                        DatabaseHandler.AddTeam(Session, t, out id);
-                        t.ID = id;
+                        if (updateTeams.Count > 0 && i < updateTeams.Count)
+                        {
+                            teams[i].ID = updateTeams[i].ID;
+                            DatabaseHandler.UpdateTeam(Session, teams[i]); //We update the team rather than creating a new one since these teams already exist in the database.
+                        }
+                        else
+                        {
+                            int id;
+                            DatabaseHandler.AddTeam(Session, teams[i], out id);
+                            teams[i].ID = id;
+                        }
                     }
 
                     //Creating the actual debates
@@ -229,10 +259,13 @@ namespace DebateSchedulerFinal
                             d.ID = assignedID;
                         }
 
-                        int seasonID;
-                        DebateSeason newSeason = new DebateSeason(0, false, teams, debates, startDate, seasonLength);
-                        //int test = DatabaseHandler.GetLatestSeasonID();
-                        DatabaseHandler.AddDebateSeason(Session, newSeason, out seasonID);
+                        int seasonID = currentSeasonID;
+                        DebateSeason newSeason = new DebateSeason(currentSeasonID, false, teams, debates, startDate, seasonLength);
+                        
+                        if (currentSeasonID == -1) //If the current season ID does not exist we create a new debate season.
+                            DatabaseHandler.AddDebateSeason(Session, newSeason, out seasonID);
+                        else //If the current season ID is a thing, we need to update the debate season instead.
+                            DatabaseHandler.UpdateDebateSeason(Session, newSeason);
 
                         Help.SetDebateID(Application, seasonID);
 
