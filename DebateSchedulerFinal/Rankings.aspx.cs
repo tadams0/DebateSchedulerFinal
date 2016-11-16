@@ -45,7 +45,7 @@ namespace DebateSchedulerFinal
 
                 for (int i = 0; i < teams.Count; i++)
                 {
-                    TableRow teamRow = Help.CreateTeamRow(teams[i], i);
+                    TableRow teamRow = Help.CreateTeamRow(teams[i], i, i);
                     Table1.Rows.Add(teamRow);
                 }
             }

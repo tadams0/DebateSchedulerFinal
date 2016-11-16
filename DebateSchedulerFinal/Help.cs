@@ -39,6 +39,8 @@ namespace DebateSchedulerFinal
 
         public static readonly Color headerTableColor = Color.CornflowerBlue;
         public static readonly Color headerTableTextColor = Color.White;
+        public static readonly Color rowColor1 = Color.White;
+        public static readonly Color rowColor2 = Color.FromArgb(235,235,235);
 
         /// <summary>
         /// Gets a random letter, this can be lower or upper case.
@@ -683,7 +685,7 @@ namespace DebateSchedulerFinal
         /// <param name="t">The team.</param>
         /// <param name="rank">The team's rank.</param>
         /// <returns>Returns a table row representation of the given team object.</returns>
-        public static TableRow CreateTeamRow(Team t, int rank)
+        public static TableRow CreateTeamRow(Team t, int rank, int rowNumber)
         {
             TableRow row = new TableRow();
 
@@ -719,6 +721,11 @@ namespace DebateSchedulerFinal
             row.Cells.Add(tieCell);
             row.Cells.Add(totalScore);
 
+            if (rowNumber % 2 == 0)
+                row.BackColor = rowColor2;
+            else
+                row.BackColor = rowColor1;
+
             return row;
         }
 
@@ -728,7 +735,7 @@ namespace DebateSchedulerFinal
         /// <param name="d">The debate object used to create the table row.</param>
         /// <param name="includeVersus">If true the table row will include a column between the two team names which contains a string "vs".</param>
         /// <returns>Returns a table row representation of the debate object.</returns>
-        public static TableRow CreateDebateRow(Debate d, bool includeVersus)
+        public static TableRow CreateDebateRow(Debate d, bool includeVersus, int rowNumber)
         {
             TableRow row = new TableRow();
 
@@ -781,6 +788,10 @@ namespace DebateSchedulerFinal
             row.Cells.Add(dateCell);
             row.Cells.Add(morningCell);
 
+            if (rowNumber % 2 == 0)
+                row.BackColor = rowColor2;
+            else
+                row.BackColor = rowColor1;
 
             return row;
         }

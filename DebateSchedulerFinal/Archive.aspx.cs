@@ -128,7 +128,7 @@ namespace DebateSchedulerFinal
 
                     for (int i = 0; i < teams.Count; i++)
                     {
-                        TableRow teamRow = Help.CreateTeamRow(teams[i], i);
+                        TableRow teamRow = Help.CreateTeamRow(teams[i], i, i);
                         Table_Rankings.Rows.Add(teamRow);
                     }
 
@@ -213,7 +213,7 @@ namespace DebateSchedulerFinal
                                 if (teamOrder == 0 || (d.Team1.Name == searchName ||
                                     d.Team2.Name == searchName))
                                 {
-                                    TableRow debateRow = Help.CreateDebateRow(d, includeVs);
+                                    TableRow debateRow = Help.CreateDebateRow(d, includeVs, addedRows);
                                     TableData.Rows.Add(debateRow);
                                     addedRows++;
                                 }
@@ -226,7 +226,7 @@ namespace DebateSchedulerFinal
                         foreach (Debate d in debates)
                         {
 
-                            TableRow debateRow = Help.CreateDebateRow(d, includeVs);
+                            TableRow debateRow = Help.CreateDebateRow(d, includeVs, addedRows);
                             TableData.Rows.Add(debateRow);
                             addedRows++;
                         }

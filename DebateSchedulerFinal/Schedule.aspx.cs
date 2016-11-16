@@ -152,7 +152,7 @@ namespace DebateSchedulerFinal
                             if (teamOrder == 0 || (d.Team1.Name == searchName ||
                                 d.Team2.Name == searchName))
                             {
-                                TableRow debateRow = CreateDebateRow(d);
+                                TableRow debateRow = Help.CreateDebateRow(d, true, addedRows);
                                 Table1.Rows.Add(debateRow);
                                 addedRows++;
                             }
@@ -165,7 +165,7 @@ namespace DebateSchedulerFinal
                     foreach (Debate d in debates)
                     {
 
-                        TableRow debateRow = CreateDebateRow(d);
+                        TableRow debateRow = Help.CreateDebateRow(d, true, addedRows);
                         Table1.Rows.Add(debateRow);
                         addedRows++;
                     }
@@ -274,63 +274,6 @@ namespace DebateSchedulerFinal
             row.Cells.Add(team2ScoreCell);
             row.Cells.Add(dateCell);
             row.Cells.Add(morningCell);
-
-            return row;
-        }
-
-        private TableRow CreateDebateRow(Debate d)
-        {
-            TableRow row = new TableRow();
-
-            TableCell team1Cell = new TableCell();
-            TableCell team2Cell = new TableCell();
-            TableCell team1ScoreCell = new TableCell();
-            TableCell team2ScoreCell = new TableCell();
-            TableCell dateCell = new TableCell();
-            TableCell morningCell = new TableCell();
-            TableCell vsCell = new TableCell();
-
-            team1Cell.Width = nameCellWidth;
-            team1Cell.HorizontalAlign = HorizontalAlign.Center;
-            team2Cell.Width = nameCellWidth;
-            team2Cell.HorizontalAlign = HorizontalAlign.Center;
-            team1ScoreCell.Width = statsCellWidth;
-            team2ScoreCell.Width = statsCellWidth;
-            dateCell.Width = dateCellWidth;
-            morningCell.Width = dateCellWidth;
-            vsCell.Width = vsCellWidth;
-            vsCell.HorizontalAlign = HorizontalAlign.Center;
-
-            team1Cell.Text = d.Team1.Name;
-            team2Cell.Text = d.Team2.Name;
-            if (d.Team1Score >= 0)
-                team1ScoreCell.Text = d.Team1Score.ToString();
-            else
-                team1ScoreCell.Text = noScoreDisplay;
-
-            if (d.Team2Score >= 0)
-                team2ScoreCell.Text = d.Team2Score.ToString();
-            else
-                team2ScoreCell.Text = noScoreDisplay;
-
-            dateCell.Text = d.Date.ToString("MM/dd/yy");
-
-            vsCell.Text = "vs";
-
-            if (d.MorningDebate)
-                morningCell.Text = "Morning";
-            else
-                morningCell.Text = "Afternoon";
-
-            row.Cells.Add(team1Cell);
-            if (includeVs)
-                row.Cells.Add(vsCell);
-            row.Cells.Add(team2Cell);
-            row.Cells.Add(team1ScoreCell);
-            row.Cells.Add(team2ScoreCell);
-            row.Cells.Add(dateCell);
-            row.Cells.Add(morningCell);
-
 
             return row;
         }
