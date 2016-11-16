@@ -232,7 +232,7 @@ namespace DebateSchedulerFinal
             ddl.Items.Add(new ListItem("4", "4"));
             ddl.Items.Add(new ListItem("5", "5"));
             if (d.Team1Score == -1)
-                ddl.SelectedIndex = 5;//0;
+                ddl.SelectedIndex = 0;//0;
             else
                 ddl.SelectedIndex = d.Team1Score + 1; //The + 2 is because of the 1 extra index items in ddl
             team1ScoreCell.Controls.Add(ddl);
@@ -247,19 +247,22 @@ namespace DebateSchedulerFinal
             ddl1.Items.Add(new ListItem("4", "4"));
             ddl1.Items.Add(new ListItem("5", "5"));
             if (d.Team2Score == -1)
-                ddl1.SelectedIndex = 5;//0;
+                ddl1.SelectedIndex = 0;//0;
             else
                 ddl1.SelectedIndex = d.Team2Score + 1; //The + 1 is because of the 1 extra index items in ddl
             team2ScoreCell.Controls.Add(ddl1);
 
             //Creating the date cell
-            Label label = new Label();
-            label.ID = "dateTime" + rowNum;
+            DropDownList dateTimeList = new DropDownList();
+            dateTimeList.Visible = false;
+            dateTimeList.ID = rowNum.ToString();
+            Label dateLabel = new Label();
             if (d.MorningDebate)
-                label.Text = d.Date.ToString("MM/dd/yy") + " during the morning.";
+                dateLabel.Text = d.Date.ToString("MM/dd/yy") + " during the morning.";
             else
-                label.Text = d.Date.ToString("MM/dd/yy") + " during the afternoon.";
-            dateCell.Controls.Add(label);
+                dateLabel.Text = d.Date.ToString("MM/dd/yy") + " during the afternoon.";
+            dateCell.Controls.Add(dateLabel);
+            dateCell.Controls.Add(dateTimeList);
             dateCell.Controls.Add(new LiteralControl("<br />"));
 
             if (d.Team1Score < 0 && d.Team2Score < 0 && loggedUser.PermissionLevel >= 3)
@@ -343,11 +346,10 @@ namespace DebateSchedulerFinal
             TableCell cell = row.Cells[5];
 
             LinkButton but = cell.FindControl("R" + rowNumber) as LinkButton;
-
+            DropDownList dropDownList = cell.FindControl(rowNumber.ToString()) as DropDownList;
+            dropDownList.Visible = true;
             if (but.Text == "Confirm Reschedule")
             {
-                //The drop down list below will always be null because it is destroyed on the post back caused by clicking the button to confirm.
-                DropDownList dropDownList = row.Cells[5].FindControl(rowNumber.ToString()) as DropDownList;
                 string value = dropDownList.SelectedValue;
                 if (value != string.Empty)
                 {
@@ -358,15 +360,17 @@ namespace DebateSchedulerFinal
                     debate.MorningDebate = morning;
                     DatabaseHandler.UpdateDebate(Session, debate);
                 }
+                dropDownList.Enabled = false;
+                dropDownList.Visible = false;
+                but.Text = "Reschedule";
+                Help.ForcePostBack(this);
             }
             else
             {
                 but.Text = "Confirm Reschedule";
                 List<DebateDate> dates = Help.GetAllAvailableDates(debates, debate, seasonStartDate, seasonLength);
-
-                DropDownList dropDownList = new DropDownList();
-                dropDownList.AutoPostBack = true;
-                dropDownList.ID = rowNumber.ToString();
+                dropDownList.Items.Clear();
+                dropDownList.Enabled = true;
                 ListItem listItem = new ListItem();
                 listItem.Text = "Do not reschedule.";
                 listItem.Value = string.Empty;
@@ -384,10 +388,7 @@ namespace DebateSchedulerFinal
 
                 ViewState["id"] = debateID;
                 ViewState["rowNumb"] = rowNumber;
-
-                cell.Controls.Clear();
-                cell.Controls.Add(dropDownList);
-                cell.Controls.Add(new LiteralControl("<br />"));// <br />"));
+                
                 cell.Controls.Add(but);
             }
             //Help.ForcePostBack(this);
@@ -436,6 +437,7 @@ namespace DebateSchedulerFinal
             else
             {
                 //Do nothing because you should be the Super.
+                Help.ForcePostBack(this); //We force a post back to remove the reschedule button on scored debates.
             }
         }
     }
