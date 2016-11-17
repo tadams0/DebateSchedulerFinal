@@ -494,21 +494,35 @@ namespace DebateSchedulerFinal
                 password = table.Rows[0]["Password"] as string;
             }
 
+            if (String.IsNullOrEmpty(email))
+                return;
+            try
+            {
+                MailMessage mail = new MailMessage();
+                mail.To.Add(email);
+                mail.From = new MailAddress("TeamWheresTheRightClick@gmail.com");
+                mail.Subject = "Password Request for account " + username;
+
+                mail.Body = "Your password is: " + password;
+
+                mail.IsBodyHtml = true;
+                SmtpClient smtpClient = new SmtpClient();
+                smtpClient.Host = "smtp.gmail.com"; //Or Your SMTP Server Address
+                smtpClient.Credentials = new System.Net.NetworkCredential
+                     ("TeamWheresTheRightClick@gmail.com", "Right123456"); // ***use valid credentials***
+                smtpClient.Port = 587;
+
+                //Or your Smtp Email ID and Password
+                smtpClient.EnableSsl = true;
+                smtpClient.Send(mail);
+            }
+            catch (Exception ex)
+            {
+                //if email is not sent.
+            }
+
+
             //return password; //TODO: Make this method email the password instead of returning the password.
-
-            SmtpClient smtpClient = new SmtpClient("smtp@gmail.com", 587);
-            smtpClient.UseDefaultCredentials = false;
-            smtpClient.Credentials = new NetworkCredential("TeamWheresTheRightClick", "Right123456");
-            smtpClient.EnableSsl = true;
-
-            MailMessage mail = new MailMessage();
-            mail.From = new MailAddress("TeamWheresTheRightClick@gmail.com");
-            mail.To.Add(email);
-            mail.Subject = "Password Recovery";
-            mail.Body = "A password recovery request was completed in Team Where's the Right Click's Debate Scheduler. The username and password to your account is \nUsername: " + username + " \nPassword: " + password;
-            mail.IsBodyHtml = true;
-
-            smtpClient.Send(mail);
         }
 
         /// <summary>
