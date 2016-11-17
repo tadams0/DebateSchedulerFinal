@@ -7,8 +7,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace DebateSchedulerFinal
-{
+namespace DebateSchedulerFinal {
     
     
     public partial class RecoverPassword {

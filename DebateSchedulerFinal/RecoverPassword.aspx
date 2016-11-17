@@ -11,25 +11,26 @@
     <div id ="RecoveryContent">
 
         <asp:Panel ID="Panel1" runat="server">
-            <asp:Panel ID="Panel_UsernameSubmition" runat="server">
+            <asp:Panel ID="Panel_UsernameSubmition" runat="server" DefaultButton="Button_Submit0">
                 <asp:Label ID="Label_Username0" runat="server" Text="Enter a username: "></asp:Label>
                 <asp:TextBox ID="TextBox_Username" runat="server"></asp:TextBox>
                 <asp:Button ID="Button_Submit0" runat="server" OnClick="Button_Submit0_Click" Text="Submit" />
                 <br />
                 <asp:Label ID="Label_UsernameWrong" runat="server" ForeColor="Red" Text="Username does not exist." Visible="False"></asp:Label>
             </asp:Panel>
-            <asp:Panel ID="Panel_QA" runat="server" Visible="False">
+            <asp:Panel ID="Panel_QA" runat="server" Visible="False" DefaultButton="Button_SubmitAnswer">
                 <asp:Label ID="Label_Question" runat="server" Text="Question: "></asp:Label>
-                <asp:TextBox ID="TextBox_Question" runat="server" OnTextChanged="TextBox3_TextChanged"></asp:TextBox>
+                <asp:TextBox ID="TextBox_Question" runat="server" OnTextChanged="TextBox3_TextChanged" ReadOnly="True" Width="250px"></asp:TextBox>
                 <br />
                 <asp:Label ID="Label_Answer" runat="server" Text="Answer: "></asp:Label>
-                <asp:TextBox ID="TextBox_Answer" runat="server"></asp:TextBox>
+                <asp:TextBox ID="TextBox_Answer" runat="server" Width="250px"></asp:TextBox>
                 <asp:Button ID="Button_SubmitAnswer" runat="server" OnClick="Button_SubmitAnswer_Click" Text="Submit" />
                 <br />
                 <asp:Label ID="Label_AnswerWrong" runat="server" ForeColor="Red" Text="Incorrect Answer" Visible="False"></asp:Label>
             </asp:Panel>
             <asp:Panel ID="Panel_AnswerCorrect" runat="server" Visible="False">
                 <asp:Label ID="Label_EmailSent" runat="server" Text="An email containing the password has been sent to the email associated with this account."></asp:Label>
+                
             </asp:Panel>
         </asp:Panel>
 

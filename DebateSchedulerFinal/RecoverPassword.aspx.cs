@@ -12,7 +12,7 @@ namespace DebateSchedulerFinal
         protected void Page_Load(object sender, EventArgs e)
         {
             ((MasterPage)Master).SetPagePermissionLevel(-1);
-
+            TextBox_Answer.Text = string.Empty;
         }
 
         protected void TextBox3_TextChanged(object sender, EventArgs e)
