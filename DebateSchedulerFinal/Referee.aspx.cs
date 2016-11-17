@@ -397,47 +397,50 @@ namespace DebateSchedulerFinal
         protected void UpdateButton_Click(object sender, EventArgs e)
         {
             User loggedUser = Help.GetUserSession(Session);
-            ErrorLabel.Visible = false;
-            for (int rowNum = 1; rowNum < Table1.Rows.Count; rowNum++) //Starts at row 1 since row 0 is header row.
+            if (loggedUser != null)
             {
-                DropDownList TeamScore1Control = Table1.Rows[rowNum].Cells[3].FindControl("ddl" + rowNum) as DropDownList;
-                DropDownList TeamScore2Control = Table1.Rows[rowNum].Cells[4].FindControl("ddl#" + rowNum) as DropDownList;
-                int team1Score = int.Parse(TeamScore1Control.SelectedValue);
-                int team2Score = int.Parse(TeamScore2Control.SelectedValue);
-                int id;
-                if (team1Score >= 0 && team2Score >= 0)
+                ErrorLabel.Visible = false;
+                for (int rowNum = 1; rowNum < Table1.Rows.Count; rowNum++) //Starts at row 1 since row 0 is header row.
                 {
-                    bool success = int.TryParse(Table1.Rows[rowNum].Cells[6].Text, NumberStyles.Any, CultureInfo.InvariantCulture, out id);
-                    Debate debate = null;
-                    foreach (Debate d in debates)
+                    DropDownList TeamScore1Control = Table1.Rows[rowNum].Cells[3].FindControl("ddl" + rowNum) as DropDownList;
+                    DropDownList TeamScore2Control = Table1.Rows[rowNum].Cells[4].FindControl("ddl#" + rowNum) as DropDownList;
+                    int team1Score = int.Parse(TeamScore1Control.SelectedValue);
+                    int team2Score = int.Parse(TeamScore2Control.SelectedValue);
+                    int id;
+                    if (team1Score >= 0 && team2Score >= 0)
                     {
-                        if (d.ID == id)
+                        bool success = int.TryParse(Table1.Rows[rowNum].Cells[6].Text, NumberStyles.Any, CultureInfo.InvariantCulture, out id);
+                        Debate debate = null;
+                        foreach (Debate d in debates)
                         {
-                            debate = d;
-                            break;
+                            if (d.ID == id)
+                            {
+                                debate = d;
+                                break;
+                            }
                         }
+
+                        debate.Team1Score = team1Score;
+                        debate.Team2Score = team2Score;
+
+                        bool result = DatabaseHandler.UpdateDebate(Session, debate);
+                    }
+                    else if (team1Score >= 0 || team2Score >= 0) //If this runs then both teams were not assigned a valid score and only one of them was.
+                    {
+                        bool success = int.TryParse(Table1.Rows[rowNum].Cells[6].Text, NumberStyles.Any, CultureInfo.InvariantCulture, out id);
+                        ErrorLabel.Text = "Both teams must be scored. Check Debate " + id;
+                        ErrorLabel.Visible = true;
+                        break; //Stops the loop so the user can fix the information before submitting the rest.
                     }
 
-                    debate.Team1Score = team1Score;
-                    debate.Team2Score = team2Score;
-                    
-                    bool result = DatabaseHandler.UpdateDebate(Session, debate);
                 }
-                else if (team1Score >= 0 || team2Score >= 0) //If this runs then both teams were not assigned a valid score and only one of them was.
+                if (loggedUser.PermissionLevel == 2)
+                    Response.Redirect(Request.RawUrl);
+                else
                 {
-                    bool success = int.TryParse(Table1.Rows[rowNum].Cells[6].Text, NumberStyles.Any, CultureInfo.InvariantCulture, out id);
-                    ErrorLabel.Text = "Both teams must be scored. Check Debate " + id;
-                    ErrorLabel.Visible = true;
-                    break; //Stops the loop so the user can fix the information before submitting the rest.
+                    //Do nothing because you should be the Super.
+                    Help.ForcePostBack(this); //We force a post back to remove the reschedule button on scored debates.
                 }
-                
-            }
-            if (loggedUser.PermissionLevel == 2)
-                Response.Redirect(Request.RawUrl);
-            else
-            {
-                //Do nothing because you should be the Super.
-                Help.ForcePostBack(this); //We force a post back to remove the reschedule button on scored debates.
             }
         }
     }
