@@ -104,6 +104,12 @@ namespace DebateSchedulerFinal
                 if (Request.Url.AbsolutePath.ToUpperInvariant() != ("/" + Help.defaultURL).ToUpperInvariant())
                     Response.Redirect(Help.defaultURL);
             }
+            
+            if (user != null && PermissionLevel == -1)
+            {
+                if (Request.Url.AbsolutePath.ToUpperInvariant() != ("/" + Help.defaultURL).ToUpperInvariant())
+                    Response.Redirect(Help.defaultURL);
+            }
         }
 
         protected void Login1_Authenticate(object sender, AuthenticateEventArgs e)

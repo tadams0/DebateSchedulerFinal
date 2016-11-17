@@ -11,6 +11,7 @@ namespace DebateSchedulerFinal
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            ((MasterPage)Master).SetPagePermissionLevel(-1);
 
         }
 
