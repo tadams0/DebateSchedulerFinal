@@ -445,7 +445,7 @@ namespace DebateSchedulerFinal
         public static User AuthenticateUsernamePassword(string username, string password) //TODO: Send a session or something back.. I don't know, send data back adequete enough to do login.
         {
             User resultingUser = null;
-            string realUsername = username.ToUpperInvariant(); //The username is converted to the upper invariant (upper case) to prevent case sensitivity on usernames.
+            string realUsername = username.ToUpperInvariant().TrimEnd(); //The username is converted to the upper invariant (upper case) to prevent case sensitivity on usernames.
             
             DataTable table = GetDataTable(GetConnectionString(), "Users", "Name", realUsername, SqlDbType.NChar, 50, false, "exception occured while authenticating username/password.");
 
@@ -494,7 +494,7 @@ namespace DebateSchedulerFinal
                 password = table.Rows[0]["Password"] as string;
             }
 
-            if (String.IsNullOrEmpty(email))
+            if (string.IsNullOrEmpty(email))
                 return;
             try
             {
@@ -532,7 +532,7 @@ namespace DebateSchedulerFinal
         /// <returns>Returns true if the username exists, false otherwise.</returns>
         public static bool UserExists(string username)
         {
-            DataTable table = GetDataTable(GetConnectionString(), "Users", "Name", username.ToUpperInvariant(), SqlDbType.NChar, 50, true, "exception occured while checking if a user exists.");
+            DataTable table = GetDataTable(GetConnectionString(), "Users", "Name", username.ToUpperInvariant().TrimEnd(), SqlDbType.NChar, 50, true, "exception occured while checking if a user exists.");
 
             if (table.Rows.Count > 0)
             {
@@ -572,7 +572,7 @@ namespace DebateSchedulerFinal
         {
             string question = string.Empty;
 
-            DataTable table = GetDataTable(GetConnectionString(), "Users", "Name", username.ToUpperInvariant(), SqlDbType.NVarChar, username.Length, false, "exception occured while gathering a user's security question.");
+            DataTable table = GetDataTable(GetConnectionString(), "Users", "Name", username.ToUpperInvariant().TrimEnd(), SqlDbType.NVarChar, username.Length, false, "exception occured while gathering a user's security question.");
             if (table.Rows.Count > 0)
             {
                 question = table.Rows[0]["SecurityQuestion"] as string;
@@ -590,7 +590,7 @@ namespace DebateSchedulerFinal
         {
             string answer = string.Empty;
 
-            DataTable table = GetDataTable(GetConnectionString(), "Users", "Name", username.ToUpperInvariant(), SqlDbType.NVarChar, username.Length, false, "exception occured while gathering a user's security answer.");
+            DataTable table = GetDataTable(GetConnectionString(), "Users", "Name", username.ToUpperInvariant().TrimEnd(), SqlDbType.NVarChar, username.Length, false, "exception occured while gathering a user's security answer.");
             if (table.Rows.Count > 0)
             {
                 answer = table.Rows[0]["SecurityAnswer"] as string;
@@ -612,7 +612,7 @@ namespace DebateSchedulerFinal
 
             if (currentSessionUser != null && currentSessionUser.PermissionLevel >= permissionToGetUsers)
             {
-                DataTable table = GetDataTable(GetConnectionString(), "Users", "Name", username.ToUpperInvariant(), SqlDbType.NVarChar, username.Length, true, "exception occured while gathering a user.");
+                DataTable table = GetDataTable(GetConnectionString(), "Users", "Name", username.ToUpperInvariant().TrimEnd(), SqlDbType.NVarChar, username.Length, true, "exception occured while gathering a user.");
                 if (table.Rows.Count > 0)
                 {
                     int id = (int)table.Rows[0]["Id"];
@@ -705,7 +705,7 @@ namespace DebateSchedulerFinal
             User currentSessionUser = Help.GetUserSession(session); //Get the current user who is running this code.
             if (currentSessionUser != null && currentSessionUser.PermissionLevel >= permissionToAddUsers) //If the user exists and their permission level is super referee or greater...
             {
-                string realUsername = newUser.Username.ToUpperInvariant(); //The username as it would appear in the database.
+                string realUsername = newUser.Username.ToUpperInvariant().TrimEnd(); //The username as it would appear in the database.
                 string realEmail = newUser.Email.ToUpperInvariant();
 
                 if (!UserExists(realUsername)) //If the username does not exist.
@@ -753,7 +753,7 @@ namespace DebateSchedulerFinal
         {
             if (ipAddress != "") //If the ip address is not blank.
             {
-                string realUsername = newUser.Username.ToUpperInvariant(); //The username as it would appear in the database.
+                string realUsername = newUser.Username.ToUpperInvariant().TrimEnd(); //The username as it would appear in the database.
                 string realEmail = newUser.Email.ToUpperInvariant();
 
                 if (!UserExists(realUsername)) //If the username does not exist.
@@ -806,7 +806,7 @@ namespace DebateSchedulerFinal
 
                     //Generating the parameters, this is done for sanitization reasons.
                     SqlParameter name = new SqlParameter("@Name", SqlDbType.NVarChar, user.Username.Length); //It is important the size is the size of the string and no the max limit.
-                    name.Value = user.Username.ToUpperInvariant();
+                    name.Value = user.Username.ToUpperInvariant().TrimEnd();
                     SqlParameter email = new SqlParameter("@Email", SqlDbType.NVarChar, user.Email.Length);
                     email.Value = user.Email;
                     SqlParameter permissions = new SqlParameter("@Permissions", SqlDbType.Int);
@@ -927,7 +927,7 @@ namespace DebateSchedulerFinal
             User currentSessionUser = Help.GetUserSession(session); //Get the current user who is running this code.
             if (currentSessionUser != null && currentSessionUser.PermissionLevel >= permissionToRemoveUsers) //If the user exists and their permission level is super referee or greater...
             {
-                string realUsername = username.ToUpperInvariant(); //The username as it would appear in the database.
+                string realUsername = username.ToUpperInvariant().TrimEnd(); //The username as it would appear in the database.
 
                 if (UserExists(realUsername)) //If the username does exist.
                 {
