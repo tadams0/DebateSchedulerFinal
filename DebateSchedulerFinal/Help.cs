@@ -575,19 +575,16 @@ namespace DebateSchedulerFinal
 
             if (debates.Count > 0)
             {
-                List<Debate> sortedList = debates.OrderBy(o => o.Date).ToList();
-                results[0].Add(sortedList[0]);
-                int currentList = 0;
-                for (int i = 1; i < debates.Count; i++)
+                foreach (Debate d in debates)
                 {
-                    DateTime previousDate = debates[i - 1].Date;
-                    DateTime currentDate = debates[i].Date;
-                    if (currentDate != previousDate)
+                    for (int i = 0; i < dates.Count; i++)
                     {
-                        currentList++;
+                        if (d.Date == dates[i])
+                        {
+                            results[i].Add(d);
+                            break;
+                        }
                     }
-
-                    results[currentList].Add(debates[i]);
                 }
             }
 

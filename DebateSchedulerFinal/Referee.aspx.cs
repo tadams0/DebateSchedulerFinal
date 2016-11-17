@@ -257,6 +257,7 @@ namespace DebateSchedulerFinal
             dateTimeList.Visible = false;
             dateTimeList.ID = rowNum.ToString();
             Label dateLabel = new Label();
+            dateLabel.ID = "L" + rowNum;
             if (d.MorningDebate)
                 dateLabel.Text = d.Date.ToString("MM/dd/yy") + " during the morning.";
             else
@@ -367,6 +368,23 @@ namespace DebateSchedulerFinal
             }
             else
             {
+                TableCell resetCell;
+                for (int i = 1; i < Table1.Rows.Count; i++) //We must now reset all other reschedulings so there is not any out of date possibilities.
+                {
+                    if (i != rowNumber) //We do not reset the clicked row.
+                    {
+                        resetCell = Table1.Rows[i].Cells[5];
+                        DropDownList list = resetCell.FindControl(i.ToString()) as DropDownList;
+                        Label label = resetCell.FindControl("L" + i) as Label;
+                        LinkButton button = resetCell.FindControl("R" + i) as LinkButton;
+                        if (list.Visible)
+                        {
+                            label.Visible = true;
+                            button.Text = "Reschedule";
+                            list.Visible = false;
+                        }
+                    }
+                }
                 but.Text = "Confirm Reschedule";
                 List<DebateDate> dates = Help.GetAllAvailableDates(debates, debate, seasonStartDate, seasonLength);
                 dropDownList.Items.Clear();
@@ -407,19 +425,10 @@ namespace DebateSchedulerFinal
                     int team1Score = int.Parse(TeamScore1Control.SelectedValue);
                     int team2Score = int.Parse(TeamScore2Control.SelectedValue);
                     int id;
+                    bool success = int.TryParse(Table1.Rows[rowNum].Cells[6].Text, NumberStyles.Any, CultureInfo.InvariantCulture, out id);
+                    Debate debate = debates[rowNum - 1];
                     if (team1Score >= 0 && team2Score >= 0)
                     {
-                        bool success = int.TryParse(Table1.Rows[rowNum].Cells[6].Text, NumberStyles.Any, CultureInfo.InvariantCulture, out id);
-                        Debate debate = null;
-                        foreach (Debate d in debates)
-                        {
-                            if (d.ID == id)
-                            {
-                                debate = d;
-                                break;
-                            }
-                        }
-
                         debate.Team1Score = team1Score;
                         debate.Team2Score = team2Score;
 
@@ -427,10 +436,20 @@ namespace DebateSchedulerFinal
                     }
                     else if (team1Score >= 0 || team2Score >= 0) //If this runs then both teams were not assigned a valid score and only one of them was.
                     {
-                        bool success = int.TryParse(Table1.Rows[rowNum].Cells[6].Text, NumberStyles.Any, CultureInfo.InvariantCulture, out id);
+                        
                         ErrorLabel.Text = "Both teams must be scored. Check Debate " + id;
                         ErrorLabel.Visible = true;
                         break; //Stops the loop so the user can fix the information before submitting the rest.
+                    }
+                    else //There was no score at all.
+                    {
+                        if (debate.Team1Score >= 0 && debate.Team2Score >= 0)
+                        {
+                            debate.Team1Score = team1Score;
+                            debate.Team2Score = team2Score;
+
+                            bool result = DatabaseHandler.UpdateDebate(Session, debate);
+                        }
                     }
 
                 }

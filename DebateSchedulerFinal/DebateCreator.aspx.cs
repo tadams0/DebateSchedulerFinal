@@ -61,6 +61,7 @@ namespace DebateSchedulerFinal
                     DateTime date = DatabaseHandler.GetDebateSeasonDateTime(seasonID, out length);
                     DropDownList_Weeks.ClearSelection();
                     DropDownList_Weeks.SelectedValue = length.ToString();
+                    Calendar_Start.VisibleDate = date;
                     Calendar_Start.SelectedDate = date;
                 }
             }
