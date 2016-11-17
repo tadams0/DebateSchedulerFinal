@@ -144,7 +144,7 @@ namespace DebateSchedulerFinal
 
             for (int i = 0; i < textBoxes.Count; i++)
             {
-                string teamName = textBoxes[i].Text;
+                string teamName = textBoxes[i].Text.TrimEnd();
                 Team newTeam = new Team(teamName, 0, 0, 0, 0, 0);
                 teams.Add(newTeam);
 
