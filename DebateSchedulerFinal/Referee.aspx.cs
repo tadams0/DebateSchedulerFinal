@@ -232,7 +232,7 @@ namespace DebateSchedulerFinal
             ddl.Items.Add(new ListItem("4", "4"));
             ddl.Items.Add(new ListItem("5", "5"));
             if (d.Team1Score == -1)
-                ddl.SelectedIndex = 0;//0;
+                ddl.SelectedIndex = 5;//0;
             else
                 ddl.SelectedIndex = d.Team1Score + 1; //The + 2 is because of the 1 extra index items in ddl
             team1ScoreCell.Controls.Add(ddl);
@@ -247,7 +247,7 @@ namespace DebateSchedulerFinal
             ddl1.Items.Add(new ListItem("4", "4"));
             ddl1.Items.Add(new ListItem("5", "5"));
             if (d.Team2Score == -1)
-                ddl1.SelectedIndex = 0;//0;
+                ddl1.SelectedIndex = 5;//0;
             else
                 ddl1.SelectedIndex = d.Team2Score + 1; //The + 1 is because of the 1 extra index items in ddl
             team2ScoreCell.Controls.Add(ddl1);
@@ -359,7 +359,7 @@ namespace DebateSchedulerFinal
                     ParseDateTimeString(value, out date, out morning);
                     debate.Date = date;
                     debate.MorningDebate = morning;
-                    DatabaseHandler.UpdateDebate(Session, ref debate);
+                    DatabaseHandler.UpdateDebate(Session, debate);
                 }
                 dropDownList.Enabled = false;
                 dropDownList.Visible = false;
@@ -432,8 +432,19 @@ namespace DebateSchedulerFinal
                         debate.Team1Score = team1Score;
                         debate.Team2Score = team2Score;
 
-                        bool result = DatabaseHandler.UpdateDebate(Session, ref debate);
-                        debates = DatabaseHandler.GetDebateSeasonDebates(debateSeasonID);
+                        bool result = DatabaseHandler.UpdateDebate(Session, debate);
+                        for (int i = 0; i < debates.Count; i++)
+                        {
+                            if (debates[i].Team1.ID == debate.Team1.ID)
+                                debates[i].Team1 = debate.Team1;
+                            else if (debates[i].Team2.ID == debate.Team1.ID)
+                                debates[i].Team2 = debate.Team1;
+                            if (debates[i].Team1.ID == debate.Team2.ID)
+                                debates[i].Team1 = debate.Team2;
+                            else if (debates[i].Team2.ID == debate.Team2.ID)
+                                debates[i].Team2 = debate.Team2;
+                        }
+                        //debates = DatabaseHandler.GetDebateSeasonDebates(debateSeasonID);
                     }
                     else if (team1Score >= 0 || team2Score >= 0) //If this runs then both teams were not assigned a valid score and only one of them was.
                     {
@@ -449,8 +460,19 @@ namespace DebateSchedulerFinal
                             debate.Team1Score = team1Score;
                             debate.Team2Score = team2Score;
 
-                            bool result = DatabaseHandler.UpdateDebate(Session, ref debate);
-                            debates = DatabaseHandler.GetDebateSeasonDebates(debateSeasonID);
+                            bool result = DatabaseHandler.UpdateDebate(Session, debate);
+                            for (int i = 0; i < debates.Count; i++)
+                            {
+                                if (debates[i].Team1.ID == debate.Team1.ID)
+                                    debates[i].Team1 = debate.Team1;
+                                else if (debates[i].Team2.ID == debate.Team1.ID)
+                                    debates[i].Team2 = debate.Team1;
+                                if (debates[i].Team1.ID == debate.Team2.ID)
+                                    debates[i].Team1 = debate.Team2;
+                                else if (debates[i].Team2.ID == debate.Team2.ID)
+                                    debates[i].Team2 = debate.Team2;
+                            }
+                            //debates = DatabaseHandler.GetDebateSeasonDebates(debateSeasonID);
                         }
                     }
 

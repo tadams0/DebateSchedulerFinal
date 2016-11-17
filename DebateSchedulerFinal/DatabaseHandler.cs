@@ -1425,7 +1425,7 @@ namespace DebateSchedulerFinal
         /// <param name="session">The session that is updating the debate.</param>
         /// <param name="debate">The new debate data that the database will hold.</param>
         /// <returns>Returns true if the debate was successfully updated, false if an error occured or permissions were not high enough.</returns>
-        public static bool UpdateDebate(HttpSessionState session, ref Debate debate)
+        public static bool UpdateDebate(HttpSessionState session, Debate debate)
         {
             User updatingUser = Help.GetUserSession(session);
             if (updatingUser != null && updatingUser.PermissionLevel >= permissionToUpdateDebates) //If the user's permission level is high enough
