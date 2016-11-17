@@ -359,7 +359,7 @@ namespace DebateSchedulerFinal
                     ParseDateTimeString(value, out date, out morning);
                     debate.Date = date;
                     debate.MorningDebate = morning;
-                    DatabaseHandler.UpdateDebate(Session, debate);
+                    DatabaseHandler.UpdateDebate(Session, ref debate);
                 }
                 dropDownList.Enabled = false;
                 dropDownList.Visible = false;
@@ -432,7 +432,8 @@ namespace DebateSchedulerFinal
                         debate.Team1Score = team1Score;
                         debate.Team2Score = team2Score;
 
-                        bool result = DatabaseHandler.UpdateDebate(Session, debate);
+                        bool result = DatabaseHandler.UpdateDebate(Session, ref debate);
+                        debates = DatabaseHandler.GetDebateSeasonDebates(debateSeasonID);
                     }
                     else if (team1Score >= 0 || team2Score >= 0) //If this runs then both teams were not assigned a valid score and only one of them was.
                     {
@@ -448,7 +449,8 @@ namespace DebateSchedulerFinal
                             debate.Team1Score = team1Score;
                             debate.Team2Score = team2Score;
 
-                            bool result = DatabaseHandler.UpdateDebate(Session, debate);
+                            bool result = DatabaseHandler.UpdateDebate(Session, ref debate);
+                            debates = DatabaseHandler.GetDebateSeasonDebates(debateSeasonID);
                         }
                     }
 
