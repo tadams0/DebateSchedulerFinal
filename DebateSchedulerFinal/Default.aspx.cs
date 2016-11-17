@@ -33,8 +33,8 @@ namespace DebateSchedulerFinal
                 int pageCount = postsPerPage;
                 if (pageCount > newsPosts.Count)
                     pageCount = newsPosts.Count;
-
-                for (int i = 0; i < pageCount; i++)
+                
+                for (int i = pageCount - 1; i >= 0 ; i--)
                 {
                     LiteralControl control = new LiteralControl();
                     control.Text = newsPosts[i].Data;
