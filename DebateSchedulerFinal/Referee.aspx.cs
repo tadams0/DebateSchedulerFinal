@@ -232,7 +232,7 @@ namespace DebateSchedulerFinal
             ddl.Items.Add(new ListItem("4", "4"));
             ddl.Items.Add(new ListItem("5", "5"));
             if (d.Team1Score == -1)
-                ddl.SelectedIndex = 5;//0;
+                ddl.SelectedIndex = 0;//0;
             else
                 ddl.SelectedIndex = d.Team1Score + 1; //The + 2 is because of the 1 extra index items in ddl
             team1ScoreCell.Controls.Add(ddl);
@@ -247,7 +247,7 @@ namespace DebateSchedulerFinal
             ddl1.Items.Add(new ListItem("4", "4"));
             ddl1.Items.Add(new ListItem("5", "5"));
             if (d.Team2Score == -1)
-                ddl1.SelectedIndex = 5;//0;
+                ddl1.SelectedIndex = 0;//0;
             else
                 ddl1.SelectedIndex = d.Team2Score + 1; //The + 1 is because of the 1 extra index items in ddl
             team2ScoreCell.Controls.Add(ddl1);
