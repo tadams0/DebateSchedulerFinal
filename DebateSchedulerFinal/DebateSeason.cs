@@ -83,6 +83,7 @@ namespace DebateSchedulerFinal
         public int Length
         {
             get { return length; }
+            set { length = value; }
         }
 
         /// <summary>

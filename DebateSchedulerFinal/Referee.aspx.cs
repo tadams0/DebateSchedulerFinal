@@ -444,7 +444,7 @@ namespace DebateSchedulerFinal
                             else if (debates[i].Team2.ID == debate.Team2.ID)
                                 debates[i].Team2 = debate.Team2;
                         }
-                        //debates = DatabaseHandler.GetDebateSeasonDebates(debateSeasonID);
+
                     }
                     else if (team1Score >= 0 || team2Score >= 0) //If this runs then both teams were not assigned a valid score and only one of them was.
                     {
@@ -472,11 +472,55 @@ namespace DebateSchedulerFinal
                                 else if (debates[i].Team2.ID == debate.Team2.ID)
                                     debates[i].Team2 = debate.Team2;
                             }
-                            //debates = DatabaseHandler.GetDebateSeasonDebates(debateSeasonID);
+
                         }
                     }
 
                 }
+
+                //Now we determine if there is any ties and if so we must generate a new match for each tie.
+                if (DatabaseHandler.DebateSeasonScored(debateSeasonID))
+                {
+                    DebateSeason season = DatabaseHandler.GetDebateSeason(debateSeasonID);
+                    List<Team> teams = season.Teams;
+                    List<Team> rankedTeams = Help.RankTeams(teams);
+                    Debate tieBreaker = null;
+                    DateTime tieBreakerStartDate = seasonStartDate.AddDays((seasonLength) * 7);
+                    bool seasonUpdated = false;
+                    for (int i = 0; i < rankedTeams.Count; i++)
+                    {
+                        for (int j = i + 1; j < rankedTeams.Count; j++)
+                        {
+                            if (rankedTeams[i].Rank == 1 && rankedTeams[j].Rank == 1)
+                            {
+                                seasonUpdated = true;
+                                tieBreaker = new Debate(0, rankedTeams[i], rankedTeams[j], -1, -1, seasonStartDate, true);
+                                int id;
+                                DatabaseHandler.AddDebate(Session, tieBreaker, out id);
+                                tieBreaker.ID = id;
+                                season.Debates.Add(tieBreaker);
+                                List<DebateDate> availableDates = new List<DebateDate>();
+                                while (availableDates.Count == 0)
+                                {
+                                    tieBreakerStartDate = tieBreakerStartDate.AddDays(7);
+                                    availableDates = Help.GetAllAvailableDates(season.Debates, tieBreaker, tieBreakerStartDate, 1);
+                                }
+                                tieBreaker.MorningDebate = availableDates[0].Morning;
+                                tieBreaker.Date = availableDates[0].Date;
+                                DatabaseHandler.UpdateDebate(Session, tieBreaker);
+                            }
+                        }
+                    }
+
+                    if (seasonUpdated)
+                    {
+                        TimeSpan length = tieBreakerStartDate - seasonStartDate;
+                        season.Length = (length.Days / 7);
+                        DatabaseHandler.UpdateDebateSeason(Session, season);
+                    }
+
+                }
+
                 if (loggedUser.PermissionLevel == 2)
                     Response.Redirect(Request.RawUrl);
                 else

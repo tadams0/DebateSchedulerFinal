@@ -57,7 +57,7 @@ namespace DebateSchedulerFinal
         private static int permissionToUpdateTeams = 2;
         private static int permissionToRemoveTeams = 3;
 
-        private static int permissionToAddDebates = 3;
+        private static int permissionToAddDebates = 2;
         private static int permissionToUpdateDebates = 2;
         private static int permissionToRemoveDebates = 3;
         private static int permissionToClearDebates = 4; //Debates cannot be removed.
