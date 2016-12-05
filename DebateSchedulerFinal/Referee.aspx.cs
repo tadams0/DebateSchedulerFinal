@@ -514,26 +514,26 @@ namespace DebateSchedulerFinal
 
                     if (seasonUpdated)
                     {
-                        TableCell resetCell;
-                        for (int i = 1; i < Table1.Rows.Count; i++) //We must now reset all other reschedulings so there is not any out of date possibilities.
-                        {
-                            resetCell = Table1.Rows[i].Cells[5];
-                            DropDownList list = resetCell.FindControl(i.ToString()) as DropDownList;
-                            Label label = resetCell.FindControl("L" + i) as Label;
-                            LinkButton button = resetCell.FindControl("R" + i) as LinkButton;
-                            if (list.Visible)
-                            {
-                                label.Visible = true;
-                                button.Text = "Reschedule";
-                                list.Visible = false;
-                            }
-                        }
-
                         TimeSpan length = tieBreakerStartDate - seasonStartDate;
                         season.Length = (length.Days / 7);
                         DatabaseHandler.UpdateDebateSeason(Session, season);
                     }
 
+                }
+
+                TableCell resetCell;
+                for (int i = 1; i < Table1.Rows.Count; i++) //We must now reset all other reschedulings so there is not any out of date possibilities.
+                {
+                    resetCell = Table1.Rows[i].Cells[5];
+                    DropDownList list = resetCell.FindControl(i.ToString()) as DropDownList;
+                    Label label = resetCell.FindControl("L" + i) as Label;
+                    LinkButton button = resetCell.FindControl("R" + i) as LinkButton;
+                    if (list.Visible)
+                    {
+                        label.Visible = true;
+                        button.Text = "Reschedule";
+                        list.Visible = false;
+                    }
                 }
 
                 if (loggedUser.PermissionLevel == 2)
